@@ -1,7 +1,7 @@
 package com.example.mypowerfulandroidapp.repository.auth
 
 import com.example.mypowerfulandroidapp.api.auth.OpenApiAuthService
-import com.example.mypowerfulandroidapp.persisitance.AuthTokenDao
+import com.example.mypowerfulandroidapp.persistence.AuthTokenDao
 import com.example.mypowerfulandroidapp.session.SessionManager
 
 class AuthRepository
