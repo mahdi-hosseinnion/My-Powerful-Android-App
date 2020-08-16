@@ -1,6 +1,7 @@
 package com.example.mypowerfulandroidapp.ui.auth
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +10,8 @@ import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
 import kotlinx.android.synthetic.main.fragment_launcher.*
 
-class LauncherFragment : Fragment() {
-
+class LauncherFragment : BaseAuthFragment() {
+//    private  val TAG = "LauncherFragment"
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,6 +32,8 @@ class LauncherFragment : Fragment() {
             navForgotPassword()
         }
         focusable_view.requestFocus()
+        Log.d("TAG", "onViewCreated: "+viewModel.hashCode())
+
     }
 
     private fun navRegistration() {
