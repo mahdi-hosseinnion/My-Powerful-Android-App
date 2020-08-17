@@ -10,12 +10,32 @@ import com.example.mypowerfulandroidapp.persistence.AccountPropertiesDao
 import com.example.mypowerfulandroidapp.persistence.AppDatabase
 import com.example.mypowerfulandroidapp.persistence.AppDatabase.Companion.DATABASE_NAME
 import com.example.mypowerfulandroidapp.persistence.AuthTokenDao
+import com.example.mypowerfulandroidapp.util.Constants.Companion.BASE_URL
+import com.example.mypowerfulandroidapp.util.LiveDataCallAdapterFactory
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
 class AppModule {
+    @Singleton
+    @Provides
+    fun provideGson():Gson{
+        return GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
+    }
+    @Singleton
+    @Provides
+    fun provideRetrofitBuilder(gson: Gson):Retrofit.Builder{
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addCallAdapterFactory(LiveDataCallAdapterFactory())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+
+    }
 
     @Singleton
     @Provides
