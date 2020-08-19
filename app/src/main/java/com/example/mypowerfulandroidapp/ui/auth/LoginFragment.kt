@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.ui.auth.state.AuthViewState
 import com.example.mypowerfulandroidapp.ui.auth.state.LoginFields
 import com.example.mypowerfulandroidapp.util.ApiEmptyResponse
@@ -30,6 +31,17 @@ class LoginFragment : BaseAuthFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: " + viewModel.hashCode())
+
+        login_button.setOnClickListener {
+            viewModel.setAuthToken(
+                AuthToken(
+                    1,
+                    "asdfsafsajasdfsadfsakdj324ls123adjflsakfjsaf"
+                )
+            )
+        }
+
+
         subscribeToObservers()
     }
 
