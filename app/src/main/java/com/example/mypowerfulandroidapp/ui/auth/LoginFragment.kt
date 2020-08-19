@@ -8,14 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.ui.auth.state.AuthViewState
+import com.example.mypowerfulandroidapp.ui.auth.state.LoginFields
 import com.example.mypowerfulandroidapp.util.ApiEmptyResponse
 import com.example.mypowerfulandroidapp.util.ApiErrorResponse
 import com.example.mypowerfulandroidapp.util.ApiSuccessResponse
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
+import kotlinx.android.synthetic.main.fragment_login.*
 
 
 class LoginFragment : BaseAuthFragment() {
-    private  val TAG = "LoginFragment"
+    private val TAG = "LoginFragment"
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -23,25 +26,32 @@ class LoginFragment : BaseAuthFragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "onViewCreated: "+viewModel.hashCode())
-        viewModel.testLoginResponse().observe(viewLifecycleOwner, Observer { response->
-            response?.let {
-                when(it){
-                    is ApiSuccessResponse->{
-                        Log.d(TAG, "aa onViewCreated: LOGIN REQUEST: ${it.body}")
-                    }
-                    is ApiErrorResponse->{
-                        Log.d(TAG, "aa onViewCreated: LOGIN REQUEST: ${it.errorMessage}")
-                    }
-                    is ApiEmptyResponse->{
-                        Log.d(TAG, "aa onViewCreated: LOGIN REQUEST: Empty Response")
-                    }
+        Log.d(TAG, "onViewCreated: " + viewModel.hashCode())
+        subscribeToObservers()
+    }
 
-                }
+    fun subscribeToObservers() {
+        viewModel.viewState.observe(viewLifecycleOwner, Observer { authViewState ->
+
+            authViewState.login_fields?.let { loginFields ->
+                loginFields.login_email?.let { input_email.setText(it) }
+                loginFields.login_password?.let { input_password.setText(it) }
             }
 
+
         })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.setLoginFields(
+            LoginFields(
+                input_email.text.toString(),
+                input_password.text.toString()
+            )
+        )
     }
 }
