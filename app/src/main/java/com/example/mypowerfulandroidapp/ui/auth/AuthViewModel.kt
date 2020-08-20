@@ -26,13 +26,21 @@ constructor(
 
     override fun handleStateEvent(stateEvent: AuthStateEvent): LiveData<DataState<AuthViewState>> {
         when (stateEvent) {
-            is AuthStateEvent.loginAttemptEvent -> {
-                return AbsentLiveData.create()
+            is AuthStateEvent.LoginAttemptEvent -> {
+                return authRepository.attemptLogin(
+                    stateEvent.email,
+                    stateEvent.password
+                )
             }
-            is AuthStateEvent.registrationAttempEvent -> {
-                return AbsentLiveData.create()
+            is AuthStateEvent.RegistrationAttemptEvent -> {
+                return authRepository.attemptRegister(
+                    stateEvent.email,
+                    stateEvent.username,
+                    stateEvent.password,
+                    stateEvent.password_confirm
+                )
             }
-            is AuthStateEvent.checkPreviousAuthEvent -> {
+            is AuthStateEvent.CheckPreviousAuthEvent -> {
                 return AbsentLiveData.create()
             }
         }
@@ -44,23 +52,25 @@ constructor(
             return
         }
         update.registrationFields = registrationFields
-        _ViewState.value=update
+        _ViewState.value = update
     }
+
     fun setLoginFields(loginFields: LoginFields) {
         val update = getCurrentViewStateOrNew()
         if (update.login_fields == loginFields) {
             return
         }
         update.login_fields = loginFields
-        _ViewState.value=update
+        _ViewState.value = update
     }
+
     fun setAuthToken(authToken: AuthToken) {
         val update = getCurrentViewStateOrNew()
         if (update.authToken == authToken) {
             return
         }
         update.authToken = authToken
-        _ViewState.value=update
+        _ViewState.value = update
     }
 
     override fun initNewViewState(): AuthViewState {

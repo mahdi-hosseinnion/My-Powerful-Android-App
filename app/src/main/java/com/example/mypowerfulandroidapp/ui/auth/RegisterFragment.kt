@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.ui.auth.state.AuthStateEvent
 import com.example.mypowerfulandroidapp.ui.auth.state.RegistrationFields
 import com.example.mypowerfulandroidapp.util.ApiEmptyResponse
 import com.example.mypowerfulandroidapp.util.ApiErrorResponse
@@ -27,9 +28,12 @@ class RegisterFragment : BaseAuthFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        register_button.setOnClickListener {
+            register()
+        }
         subscribeToObservers()
     }
-    fun subscribeToObservers() {
+    private fun subscribeToObservers() {
         viewModel.viewState.observe(viewLifecycleOwner, Observer { authViewState ->
 
             authViewState.registrationFields?.let { registrationFields ->
@@ -41,7 +45,16 @@ class RegisterFragment : BaseAuthFragment() {
 
         })
     }
-
+    private fun register(){
+        viewModel.setStatEvent(
+            AuthStateEvent.RegistrationAttemptEvent(
+                input_email.text.toString(),
+                input_username.text.toString(),
+                input_password.text.toString(),
+                input_password_confirm.text.toString()
+            )
+        )
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.setRegistrationFields(

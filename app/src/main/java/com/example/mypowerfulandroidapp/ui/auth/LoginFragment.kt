@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.models.AuthToken
+import com.example.mypowerfulandroidapp.ui.auth.state.AuthStateEvent
 import com.example.mypowerfulandroidapp.ui.auth.state.AuthViewState
 import com.example.mypowerfulandroidapp.ui.auth.state.LoginFields
 import com.example.mypowerfulandroidapp.util.ApiEmptyResponse
@@ -33,19 +34,12 @@ class LoginFragment : BaseAuthFragment() {
         Log.d(TAG, "onViewCreated: " + viewModel.hashCode())
 
         login_button.setOnClickListener {
-            viewModel.setAuthToken(
-                AuthToken(
-                    1,
-                    "asdfsafsajasdfsadfsakdj324ls123adjflsakfjsaf"
-                )
-            )
+            login()
         }
-
-
         subscribeToObservers()
     }
 
-    fun subscribeToObservers() {
+    private fun subscribeToObservers() {
         viewModel.viewState.observe(viewLifecycleOwner, Observer { authViewState ->
 
             authViewState.login_fields?.let { loginFields ->
@@ -56,7 +50,14 @@ class LoginFragment : BaseAuthFragment() {
 
         })
     }
-
+    private fun login(){
+        viewModel.setStatEvent(
+            AuthStateEvent.LoginAttemptEvent(
+                input_email.text.toString(),
+                input_password.text.toString()
+            )
+        )
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.setLoginFields(
