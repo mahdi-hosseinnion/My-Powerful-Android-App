@@ -40,6 +40,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
                 withContext(Main) {
                     //make network call
                     val apiResponse = createCall()
+                    Log.d(TAG, "Response: $apiResponse")
                     result.addSource(apiResponse) { response ->
                         result.removeSource(apiResponse)
                         coroutineScope.launch {
@@ -106,6 +107,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
     }
 
     fun onErrorReturn(errorMessage: String?, shouldUseDialog: Boolean, shouldUseToast: Boolean) {
+        Log.e(TAG, "onErrorReturn: $errorMessage" )
         var msg = errorMessage
         var useDialog = shouldUseDialog
         var responseType: ResponseType = ResponseType.None()
@@ -146,7 +148,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
         result.value = dataState
     }
 
-    protected fun getAsLiveData() = result as LiveData<DataState<ViewStateType>>
+     fun getAsLiveData() = result as LiveData<DataState<ViewStateType>>
 
     abstract suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<ResponseObject>)
     abstract fun createCall(): LiveData<GenericApiResponse<ResponseObject>>

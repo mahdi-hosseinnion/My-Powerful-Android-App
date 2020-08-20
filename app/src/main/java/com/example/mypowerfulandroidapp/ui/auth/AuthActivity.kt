@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.findNavController
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.ui.BaseActivity
 import com.example.mypowerfulandroidapp.ui.ResponseType
@@ -15,7 +18,15 @@ import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
 import kotlinx.android.synthetic.main.activity_auth.*
 import javax.inject.Inject
 
-class AuthActivity : BaseActivity() {
+class AuthActivity : BaseActivity() ,
+NavController.OnDestinationChangedListener{
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        viewModel.cancelActiveJobs()
+    }
     private val TAG = "AuthActivity"
 
     @Inject
@@ -27,6 +38,7 @@ class AuthActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
         viewModel = ViewModelProvider(this, viewModelProvider).get(AuthViewModel::class.java)
+        findNavController(R.id.auth_nav_host_fragment).addOnDestinationChangedListener(this)
         subscribeToObservers()
     }
 
@@ -80,4 +92,6 @@ class AuthActivity : BaseActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
+
+
 }
