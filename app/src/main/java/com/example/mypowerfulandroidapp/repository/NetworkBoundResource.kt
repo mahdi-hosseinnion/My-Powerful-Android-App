@@ -10,6 +10,7 @@ import com.example.mypowerfulandroidapp.ui.Response
 import com.example.mypowerfulandroidapp.ui.ResponseType
 import com.example.mypowerfulandroidapp.util.*
 import com.example.mypowerfulandroidapp.util.Constants.Companion.NETWORK_TIMEOUT
+import com.example.mypowerfulandroidapp.util.Constants.Companion.TESTING_CACHE_DELAY
 import com.example.mypowerfulandroidapp.util.Constants.Companion.TESTING_NETWORK_DELAY
 import com.example.mypowerfulandroidapp.util.ErrorHandling.Companion.ERROR_CHECK_NETWORK_CONNECTION
 import com.example.mypowerfulandroidapp.util.ErrorHandling.Companion.ERROR_UNKNOWN
@@ -22,7 +23,8 @@ import kotlin.concurrent.fixedRateTimer
 
 
 abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
-    isConnectedToTheInternet: Boolean
+    isConnectedToTheInternet: Boolean,
+    isNetworkRequest: Boolean
 ) {
     private val TAG = "NetworkBoundResource"
     protected val result = MediatorLiveData<DataState<ViewStateType>>()
@@ -33,50 +35,61 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
     init {
         setJob(initNewJob())
         setValue(DataState.loading(true, null))
-        if (isConnectedToTheInternet) {
-            coroutineScope.launch {
-                //simulate network delay for testing
-                delay(TESTING_NETWORK_DELAY)
-                withContext(Main) {
-                    //make network call
-                    val apiResponse = createCall()
-                    Log.d(TAG, "Response: $apiResponse")
-                    result.addSource(apiResponse) { response ->
-                        result.removeSource(apiResponse)
-                        coroutineScope.launch {
-                            handleApiResponse(response)
+        if (isNetworkRequest) {
+            if (isConnectedToTheInternet) {
+                coroutineScope.launch {
+                    //simulate network delay for testing
+                    delay(TESTING_NETWORK_DELAY)
+                    withContext(Main) {
+                        //make network call
+                        val apiResponse = createCall()
+                        Log.d(TAG, "Response: $apiResponse")
+                        result.addSource(apiResponse) { response ->
+                            result.removeSource(apiResponse)
+                            coroutineScope.launch {
+                                handleApiResponse(response)
+                            }
                         }
                     }
                 }
-            }
-            //for network timeout
-            GlobalScope.launch(IO) {
-                delay(NETWORK_TIMEOUT)
-                if (!job.isCompleted){
-                    Log.d(TAG, "NetworkBoundResource: NetWork TimeOUT...")
-                    job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))
+                //for network timeout
+                GlobalScope.launch(IO) {
+                    delay(NETWORK_TIMEOUT)
+                    if (!job.isCompleted) {
+                        Log.d(TAG, "NetworkBoundResource: NetWork TimeOUT...")
+                        job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))
+                    }
                 }
+            } else {
+                Log.e(TAG, "NetworkBoundResource: NO Internet access.")
+                onErrorReturn(UNABLE_TODO_OPERATION_WO_INTERNET, true, false)
             }
         } else {
-            Log.e(TAG, "NetworkBoundResource: NO Internet access.")
-            onErrorReturn(UNABLE_TODO_OPERATION_WO_INTERNET, true, false)
+            coroutineScope.launch {
+                //fake delay for test
+                delay(TESTING_CACHE_DELAY)
+                //view Data From ONLY cache and return
+                createCacheRequestAndReturn()
+            }
+
         }
     }
 
+
     private suspend fun handleApiResponse(response: GenericApiResponse<ResponseObject>) {
-            when(response){
-                is ApiSuccessResponse->{
-                    handleApiSuccessResponse(response)
-                }
-                is ApiErrorResponse->{
-                    Log.e(TAG, "handleApiResponse: ERROR: ${response.errorMessage}" )
-                    onErrorReturn(response.errorMessage,true,false)
-                }
-                is ApiEmptyResponse->{
-                    Log.e(TAG, "handleApiResponse: ERROR: HTTP code 204 Return NOTHING" )
-                    onErrorReturn("HTTP Code = 204. Return NOTHING",true,false)
-                }
+        when (response) {
+            is ApiSuccessResponse -> {
+                handleApiSuccessResponse(response)
             }
+            is ApiErrorResponse -> {
+                Log.e(TAG, "handleApiResponse: ERROR: ${response.errorMessage}")
+                onErrorReturn(response.errorMessage, true, false)
+            }
+            is ApiEmptyResponse -> {
+                Log.e(TAG, "handleApiResponse: ERROR: HTTP code 204 Return NOTHING")
+                onErrorReturn("HTTP Code = 204. Return NOTHING", true, false)
+            }
+        }
 
 
     }
@@ -107,7 +120,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
     }
 
     fun onErrorReturn(errorMessage: String?, shouldUseDialog: Boolean, shouldUseToast: Boolean) {
-        Log.e(TAG, "onErrorReturn: $errorMessage" )
+        Log.e(TAG, "onErrorReturn: $errorMessage")
         var msg = errorMessage
         var useDialog = shouldUseDialog
         var responseType: ResponseType = ResponseType.None()
@@ -148,8 +161,9 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
         result.value = dataState
     }
 
-     fun getAsLiveData() = result as LiveData<DataState<ViewStateType>>
+    fun getAsLiveData() = result as LiveData<DataState<ViewStateType>>
 
+    abstract suspend fun createCacheRequestAndReturn()
     abstract suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<ResponseObject>)
     abstract fun createCall(): LiveData<GenericApiResponse<ResponseObject>>
     abstract fun setJob(job: Job)

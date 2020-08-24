@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.ui.BaseActivity
 import com.example.mypowerfulandroidapp.ui.ResponseType
+import com.example.mypowerfulandroidapp.ui.auth.state.AuthStateEvent
 import com.example.mypowerfulandroidapp.ui.auth.state.AuthViewState
 import com.example.mypowerfulandroidapp.ui.main.MainActivity
 import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
@@ -21,17 +22,9 @@ import kotlinx.android.synthetic.main.activity_auth.progress_bar
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
-class AuthActivity : BaseActivity() ,
-NavController.OnDestinationChangedListener{
-    override fun onDestinationChanged(
-        controller: NavController,
-        destination: NavDestination,
-        arguments: Bundle?
-    ) {
-        viewModel.cancelActiveJobs()
-    }
+class AuthActivity : BaseActivity(),
+    NavController.OnDestinationChangedListener {
     private val TAG = "AuthActivity"
-
 
     @Inject
     lateinit var viewModelProvider: ViewModelProviderFactory
@@ -44,6 +37,7 @@ NavController.OnDestinationChangedListener{
         viewModel = ViewModelProvider(this, viewModelProvider).get(AuthViewModel::class.java)
         findNavController(R.id.auth_nav_host_fragment).addOnDestinationChangedListener(this)
         subscribeToObservers()
+        checkPreviousAuthUser()
     }
 
     private fun subscribeToObservers() {
@@ -77,10 +71,15 @@ NavController.OnDestinationChangedListener{
 
     }
 
+    fun checkPreviousAuthUser() {
+        viewModel.setStatEvent(AuthStateEvent.CheckPreviousAuthEvent())
+    }
+
     private fun navToMainActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
+
     override fun displayProgressBar(loading: Boolean) {
         if (loading) {
             progress_bar.visibility = View.VISIBLE
@@ -89,4 +88,11 @@ NavController.OnDestinationChangedListener{
         }
     }
 
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        viewModel.cancelActiveJobs()
+    }
 }

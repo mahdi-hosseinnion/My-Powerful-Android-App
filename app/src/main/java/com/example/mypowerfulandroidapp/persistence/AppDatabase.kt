@@ -7,7 +7,7 @@ import com.example.mypowerfulandroidapp.models.AuthToken
 
 @Database(
     entities = [AccountProperties::class, AuthToken::class],
-    version = 1
+    version = 2
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getAuthTokenDao(): AuthTokenDao

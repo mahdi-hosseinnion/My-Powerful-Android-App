@@ -23,7 +23,7 @@ data class AccountProperties(
     @SerializedName("username")
     @Expose
     @ColumnInfo(name = "username")
-    var username: Int
+    var username: String
 
 
 )
