@@ -5,6 +5,9 @@ import com.example.mypowerfulandroidapp.di.auth.AuthFragmentBuildersModule
 import com.example.mypowerfulandroidapp.di.auth.AuthModule
 import com.example.mypowerfulandroidapp.di.auth.AuthScope
 import com.example.mypowerfulandroidapp.di.auth.AuthViewModelModule
+import com.example.mypowerfulandroidapp.di.main.FragmentBuildersModule
+import com.example.mypowerfulandroidapp.di.main.MainModule
+import com.example.mypowerfulandroidapp.di.main.MainViewModelModule
 import com.example.mypowerfulandroidapp.ui.auth.AuthActivity
 import com.example.mypowerfulandroidapp.ui.main.MainActivity
 import dagger.android.ContributesAndroidInjector
@@ -18,7 +21,9 @@ abstract class ActivityBuildersModule {
     )
     abstract fun contributeAuthActivity(): AuthActivity
 
-    @ContributesAndroidInjector()
+    @ContributesAndroidInjector(
+        modules = [MainModule::class, FragmentBuildersModule::class, MainViewModelModule::class]
+    )
     abstract fun contributeMainActivity(): MainActivity
 
 }

@@ -27,9 +27,9 @@ import java.lang.ClassCastException
 
 class ForgotPasswordFragment : BaseAuthFragment() {
     private val TAG = "ForgotPasswordFragment"
-    lateinit var mWebView: WebView
+    private lateinit var mWebView: WebView
     lateinit var onDataStateChangeListener: DataStateChangeListener
-    val wbInteractionCallBack: WebAppInterface.OnWebInteractionCallBack =
+    private val wbInteractionCallBack: WebAppInterface.OnWebInteractionCallBack =
         object : WebAppInterface.OnWebInteractionCallBack {
             override fun onSuccess(email: String) {
                 Log.d(TAG, "onSuccess: reset password link have been send for email: $email")
