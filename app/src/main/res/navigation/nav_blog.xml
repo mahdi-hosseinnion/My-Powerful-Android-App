@@ -31,7 +31,7 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_viewBlogFragment_to_blogFragment3"
+            android:id="@+id/action_viewBlogFragment_to_home"
             app:destination="@id/blogFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
@@ -49,7 +49,7 @@
 
 
         <action
-            android:id="@+id/action_updateBlogFragment_to_blogFragment3"
+            android:id="@+id/action_updateBlogFragment_to_home"
             app:destination="@id/blogFragment"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"

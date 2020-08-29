@@ -147,6 +147,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
             )
         )
 
+
     }
 
     fun onCompleteJob(dataState: DataState<ViewStateType>) {
