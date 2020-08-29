@@ -40,6 +40,10 @@ class AuthActivity : BaseActivity(),
         checkPreviousAuthUser()
     }
 
+    override fun expandAppBar() {
+    //do nothing
+    }
+
     private fun subscribeToObservers() {
 
         viewModel.dataState.observe(this, Observer { dataState ->

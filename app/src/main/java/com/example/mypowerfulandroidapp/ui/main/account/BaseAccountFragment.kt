@@ -1,5 +1,6 @@
 package com.example.mypowerfulandroidapp.ui.main.account
 
+
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -24,14 +25,16 @@ abstract class BaseAccountFragment : DaggerFragment() {
         setupActionBarWithNavController(R.id.accountFragment, activity as AppCompatActivity)
     }
 
-    private fun setupActionBarWithNavController(fragmentId: Int, activity: AppCompatActivity) {
+    /*
+          @fragmentId is id of fragment from graph to be EXCLUDED from action back bar nav
+        */
+    fun setupActionBarWithNavController(fragmentId: Int, activity: AppCompatActivity) {
         val appBarConfiguration = AppBarConfiguration(setOf(fragmentId))
         NavigationUI.setupActionBarWithNavController(
             activity,
             findNavController(),
             appBarConfiguration
         )
-
     }
 
     override fun onAttach(context: Context) {

@@ -1,7 +1,6 @@
 package com.example.mypowerfulandroidapp.ui.main
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -18,8 +17,11 @@ import com.example.mypowerfulandroidapp.ui.main.blog.UpdateBlogFragment
 import com.example.mypowerfulandroidapp.ui.main.blog.ViewBlogFragment
 import com.example.mypowerfulandroidapp.util.BottomNavController
 import com.example.mypowerfulandroidapp.util.setUpNavigation
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
+
+
 
 class MainActivity : BaseActivity(),
     BottomNavController.NavGraphProvider,
@@ -29,7 +31,11 @@ class MainActivity : BaseActivity(),
     private lateinit var bottomNavigationView: BottomNavigationView
     private val bottomNavController by lazy(LazyThreadSafetyMode.NONE) {
         BottomNavController(
-            this, R.id.main_fragments_container, R.id.nav_blog, this, this
+            this,
+            R.id.main_nav_host_fragment,
+            R.id.nav_blog,
+            this,
+            this
         )
     }
 
@@ -81,6 +87,10 @@ class MainActivity : BaseActivity(),
         return super.onOptionsItemSelected(item)
     }
 
+    override fun expandAppBar() {
+        findViewById<AppBarLayout>(R.id.app_bar).setExpanded(true)
+    }
+
     override fun onBackPressed() = bottomNavController.onBackPressed()
     override fun getNavGraphId(itemId: Int) = when (itemId) {
         R.id.nav_blog -> {
@@ -98,7 +108,9 @@ class MainActivity : BaseActivity(),
     }
 
     override fun onGraphChange() {
+        expandAppBar()
         //TODO("what needs to happen when graph changes in activity?")
+
     }
 
     override fun onReselectNavItem(navController: NavController, fragment: Fragment) =
@@ -119,5 +131,4 @@ class MainActivity : BaseActivity(),
                 //do nothing
             }
         }
-
 }

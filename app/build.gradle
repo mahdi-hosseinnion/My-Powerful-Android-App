@@ -95,7 +95,9 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
 
     // jetpack navigation components
-    def nav_version = "2.3.0-alpha03"
+//    def nav_version = "2.3.0-alpha03"
+    def nav_version = "2.1.0-alpha02"
+
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-runtime:$nav_version"
