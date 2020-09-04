@@ -2,6 +2,7 @@ package com.example.mypowerfulandroidapp.ui.main.account
 
 import androidx.lifecycle.LiveData
 import com.example.mypowerfulandroidapp.models.AccountProperties
+import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.repository.main.AccountRepository
 import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.ui.BaseViewModel
@@ -22,7 +23,9 @@ constructor(
     override fun handleStateEvent(stateEvent: AccountStateEvent): LiveData<DataState<AccountViewState>> {
         return when (stateEvent) {
             is AccountStateEvent.GetAccountPropertiesEvent -> {
-                AbsentLiveData.create()
+                return sessionManager._cachedToken.value?.let { authToken ->
+                    accountRepository.getAccountProperties(authToken)
+                } ?: AbsentLiveData.create()
             }
             is AccountStateEvent.UpdateAccountPropertiesEvent -> {
                 AbsentLiveData.create()
@@ -41,7 +44,7 @@ constructor(
         return AccountViewState()
     }
 
-    fun setAccountPropertiesDao(accountProperties: AccountProperties) {
+    fun setAccountProperties(accountProperties: AccountProperties) {
         val update = getCurrentViewStateOrNew()
         if (update.accountProperties == accountProperties) {
             return

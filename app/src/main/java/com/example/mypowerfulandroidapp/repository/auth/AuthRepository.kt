@@ -46,10 +46,14 @@ constructor(
         if (!loginFieldsErrors.equals(LoginFields.LoginError.none())) {
             return returnErrorResponse(loginFieldsErrors, ResponseType.Dialog())
         }
-        return object : NetworkBoundResource<LoginResponse, AuthViewState>(
+        return object : NetworkBoundResource<LoginResponse,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet(),
-            isNetworkRequest = true
+            isNetworkRequest = true,
+            shouldLoadFromCache = false
+
         ) {
+
+
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<LoginResponse>) {
                 //handle server side error like invalid credentials that count event with 200 code
                 if (response.body.response.equals(GENERIC_AUTH_ERROR)) {
@@ -105,6 +109,12 @@ constructor(
 
             //not use in this case
             override suspend fun createCacheRequestAndReturn() {}
+            //not use in this case
+            override fun loadFromCache(): LiveData<AuthViewState> {
+                return AbsentLiveData.create()
+            }
+            //not use in this case
+            override suspend fun updateLocalDb(cacheObject: Any) {}
         }.getAsLiveData()
     }
 
@@ -146,9 +156,10 @@ constructor(
         if (!registrationFieldsErrors.equals(RegistrationFields.RegistrationError.none())) {
             return returnErrorResponse(registrationFieldsErrors, ResponseType.Dialog())
         }
-        return object : NetworkBoundResource<RegistrationResponse, AuthViewState>(
+        return object : NetworkBoundResource<RegistrationResponse,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet(),
-            isNetworkRequest = true
+            isNetworkRequest = true,
+            shouldLoadFromCache = false
         ) {
             override suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<RegistrationResponse>) {
                 //handle server side error like invalid credentials that count event with 200 code
@@ -205,6 +216,12 @@ constructor(
 
             //not use in this case
             override suspend fun createCacheRequestAndReturn() {}
+            //not use in this case
+            override fun loadFromCache(): LiveData<AuthViewState> {
+                return AbsentLiveData.create()
+            }
+            //not use in this case
+            override suspend fun updateLocalDb(cacheObject: Any) {}
         }.getAsLiveData()
     }
 
@@ -214,9 +231,10 @@ constructor(
         if (previousAuthUser.isNullOrBlank()) {
             return returnNoTokenFound()
         }
-        return object : NetworkBoundResource<Void, AuthViewState>(
+        return object : NetworkBoundResource<Void,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet(),
-            isNetworkRequest = false
+            isNetworkRequest = false,
+            shouldLoadFromCache = false
         ) {
             override suspend fun createCacheRequestAndReturn() {
                 accountPropertiesDao.searchByEmail(previousAuthUser).let { accountProperties ->
@@ -257,6 +275,11 @@ constructor(
             override fun createCall(): LiveData<GenericApiResponse<Void>> {
                 return AbsentLiveData.create()
             }
+            override fun loadFromCache(): LiveData<AuthViewState> {
+                return AbsentLiveData.create()
+            }
+            //not use in this case
+            override suspend fun updateLocalDb(cacheObject: Any) {}
 
             override fun setJob(job: Job) {
                 repositoryJob?.cancel()

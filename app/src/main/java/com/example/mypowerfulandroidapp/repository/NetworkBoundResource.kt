@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
+import com.example.mypowerfulandroidapp.models.AccountProperties
 import com.example.mypowerfulandroidapp.ui.DataState
 import com.example.mypowerfulandroidapp.ui.Response
 import com.example.mypowerfulandroidapp.ui.ResponseType
@@ -22,9 +23,10 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlin.concurrent.fixedRateTimer
 
 
-abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
+abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
     isConnectedToTheInternet: Boolean,
-    isNetworkRequest: Boolean
+    isNetworkRequest: Boolean,
+    shouldLoadFromCache: Boolean
 ) {
     private val TAG = "NetworkBoundResource"
     protected val result = MediatorLiveData<DataState<ViewStateType>>()
@@ -35,6 +37,13 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
     init {
         setJob(initNewJob())
         setValue(DataState.loading(true, null))
+        if (shouldLoadFromCache) {
+            val dbResource = loadFromCache()
+            result.addSource(dbResource) {
+                result.removeSource(dbResource)
+                setValue(DataState.loading(true, cashedData = it))
+            }
+        }
         if (isNetworkRequest) {
             if (isConnectedToTheInternet) {
                 coroutineScope.launch {
@@ -120,7 +129,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
     }
 
     fun onErrorReturn(errorMessage: String?, shouldUseDialog: Boolean, shouldUseToast: Boolean) {
-        Log.e(TAG, "onErrorReturn: $errorMessage")
+        Log.e(TAG, "onErrorReturn:8 $errorMessage")
         var msg = errorMessage
         var useDialog = shouldUseDialog
         var responseType: ResponseType = ResponseType.None()
@@ -167,5 +176,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>(
     abstract suspend fun createCacheRequestAndReturn()
     abstract suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<ResponseObject>)
     abstract fun createCall(): LiveData<GenericApiResponse<ResponseObject>>
+    abstract fun loadFromCache(): LiveData<ViewStateType>
+    abstract suspend fun updateLocalDb(cacheObject: CacheObject)
     abstract fun setJob(job: Job)
 }
