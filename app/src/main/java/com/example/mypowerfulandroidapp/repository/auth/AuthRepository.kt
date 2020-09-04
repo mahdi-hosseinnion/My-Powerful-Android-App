@@ -49,6 +49,7 @@ constructor(
         return object : NetworkBoundResource<LoginResponse,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet(),
             isNetworkRequest = true,
+            shouldCancelIfNOInternet = true,
             shouldLoadFromCache = false
 
         ) {
@@ -114,7 +115,7 @@ constructor(
                 return AbsentLiveData.create()
             }
             //not use in this case
-            override suspend fun updateLocalDb(cacheObject: Any) {}
+            override suspend fun updateLocalDb(cacheObject: Any?) {}
         }.getAsLiveData()
     }
 
@@ -159,6 +160,7 @@ constructor(
         return object : NetworkBoundResource<RegistrationResponse,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet(),
             isNetworkRequest = true,
+            shouldCancelIfNOInternet =true,
             shouldLoadFromCache = false
         ) {
             override suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<RegistrationResponse>) {
@@ -221,7 +223,7 @@ constructor(
                 return AbsentLiveData.create()
             }
             //not use in this case
-            override suspend fun updateLocalDb(cacheObject: Any) {}
+            override suspend fun updateLocalDb(cacheObject: Any?) {}
         }.getAsLiveData()
     }
 
@@ -234,6 +236,7 @@ constructor(
         return object : NetworkBoundResource<Void,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet(),
             isNetworkRequest = false,
+            shouldCancelIfNOInternet =false,
             shouldLoadFromCache = false
         ) {
             override suspend fun createCacheRequestAndReturn() {
@@ -279,7 +282,7 @@ constructor(
                 return AbsentLiveData.create()
             }
             //not use in this case
-            override suspend fun updateLocalDb(cacheObject: Any) {}
+            override suspend fun updateLocalDb(cacheObject: Any?) {}
 
             override fun setJob(job: Job) {
                 repositoryJob?.cancel()
