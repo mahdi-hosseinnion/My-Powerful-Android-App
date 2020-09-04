@@ -20,4 +20,13 @@ interface OpenApiMainService {
         @Field("email") email: String,
         @Field("username") username: String
     ): LiveData<GenericApiResponse<GenericResponse>>
+
+    @PUT("account/change_password/")
+    @FormUrlEncoded
+    fun changePassword(
+        @Header("Authorization")authorization: String,
+        @Field("old_password")oldPassword:String,
+        @Field("new_password")newPassword:String,
+        @Field("confirm_new_password")confirm_new_password:String
+    ):LiveData<GenericApiResponse<GenericResponse>>
 }
