@@ -1,6 +1,8 @@
 package com.example.mypowerfulandroidapp.ui
 
+import android.content.Context
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import com.example.mypowerfulandroidapp.di.DaggerAppComponent
 import com.example.mypowerfulandroidapp.session.SessionManager
 import dagger.android.support.DaggerAppCompatActivity
@@ -74,4 +76,12 @@ abstract class BaseActivity : DaggerAppCompatActivity(),
     @Inject
     lateinit var sessionManager: SessionManager
 
+    override fun hideSoftKeyboard() {
+        if(currentFocus!=null){
+            val inputMethodManager = getSystemService(
+
+             Context.INPUT_METHOD_SERVICE)as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken,0)
+        }
+    }
 }
