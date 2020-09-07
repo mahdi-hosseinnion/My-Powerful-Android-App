@@ -80,7 +80,7 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
         }
         //for network timeout
         GlobalScope.launch(IO) {
-            delay(NETWORK_TIMEOUT)
+            delay(NETWORK_TIMEOUT + TESTING_NETWORK_DELAY)
             if (!job.isCompleted) {
                 Log.d(TAG, "NetworkBoundResource: NetWork TimeOUT...")
                 job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))

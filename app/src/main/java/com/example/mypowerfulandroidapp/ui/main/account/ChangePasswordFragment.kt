@@ -38,6 +38,7 @@ class ChangePasswordFragment : BaseAccountFragment() {
                     input_confirm_new_password?.text.toString()
                 )
             )
+            stateChangeListener.hideSoftKeyboard()
         }
         subscribeToObservers()
 
@@ -59,4 +60,5 @@ class ChangePasswordFragment : BaseAccountFragment() {
         })
 
     }
+
 }

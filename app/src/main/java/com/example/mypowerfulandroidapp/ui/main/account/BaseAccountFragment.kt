@@ -23,16 +23,24 @@ abstract class BaseAccountFragment : DaggerFragment() {
     val TAG: String = "AppDebug"
 
     lateinit var stateChangeListener: DataStateChangeListener
+
     @Inject
     lateinit var providerFactory: ViewModelProviderFactory
-    lateinit var viewModel:AccountViewModel
+    lateinit var viewModel: AccountViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupActionBarWithNavController(R.id.accountFragment, activity as AppCompatActivity)
-        viewModel=activity?.run {
-            ViewModelProvider(this,providerFactory).get(AccountViewModel::class.java)
-        }?:throw Exception("Invalid Activity")
+        viewModel = activity?.run {
+            ViewModelProvider(this, providerFactory).get(AccountViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+        cancelActiveJobs()
+
     }
+
+    fun cancelActiveJobs() {
+        viewModel.cancelActiveJobs()
+    }
+
 
     /*
           @fragmentId is id of fragment from graph to be EXCLUDED from action back bar nav

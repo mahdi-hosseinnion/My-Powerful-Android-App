@@ -7,6 +7,7 @@ import com.example.mypowerfulandroidapp.repository.main.AccountRepository
 import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.ui.BaseViewModel
 import com.example.mypowerfulandroidapp.ui.DataState
+import com.example.mypowerfulandroidapp.ui.auth.state.AuthStateEvent
 import com.example.mypowerfulandroidapp.ui.main.account.state.AccountStateEvent
 import com.example.mypowerfulandroidapp.ui.main.account.state.AccountViewState
 import com.example.mypowerfulandroidapp.util.AbsentLiveData
@@ -73,5 +74,16 @@ constructor(
 
     fun logout() {
         sessionManager.logout()
+    }
+    fun cancelActiveJobs(){
+        handlePendingData()
+        accountRepository.cancelActiveJobs()
+    }
+    fun handlePendingData(){
+        setStatEvent(AccountStateEvent.None())
+    }
+    override fun onCleared() {
+        super.onCleared()
+        cancelActiveJobs()
     }
 }

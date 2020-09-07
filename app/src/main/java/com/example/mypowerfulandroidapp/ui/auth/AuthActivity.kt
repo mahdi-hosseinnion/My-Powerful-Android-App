@@ -37,7 +37,6 @@ class AuthActivity : BaseActivity(),
         viewModel = ViewModelProvider(this, viewModelProvider).get(AuthViewModel::class.java)
         findNavController(R.id.auth_nav_host_fragment).addOnDestinationChangedListener(this)
         subscribeToObservers()
-        checkPreviousAuthUser()
     }
 
     override fun expandAppBar() {
@@ -75,7 +74,11 @@ class AuthActivity : BaseActivity(),
 
     }
 
-    fun checkPreviousAuthUser() {
+    override fun onResume() {
+        super.onResume()
+        checkPreviousAuthUser()
+    }
+    private fun checkPreviousAuthUser() {
         viewModel.setStatEvent(AuthStateEvent.CheckPreviousAuthEvent())
     }
 

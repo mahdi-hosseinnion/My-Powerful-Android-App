@@ -11,16 +11,18 @@ import androidx.navigation.NavController
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.ui.BaseActivity
 import com.example.mypowerfulandroidapp.ui.auth.AuthActivity
+import com.example.mypowerfulandroidapp.ui.main.account.BaseAccountFragment
 import com.example.mypowerfulandroidapp.ui.main.account.ChangePasswordFragment
 import com.example.mypowerfulandroidapp.ui.main.account.UpdateAccountFragment
+import com.example.mypowerfulandroidapp.ui.main.blog.BaseBlogFragment
 import com.example.mypowerfulandroidapp.ui.main.blog.UpdateBlogFragment
 import com.example.mypowerfulandroidapp.ui.main.blog.ViewBlogFragment
+import com.example.mypowerfulandroidapp.ui.main.create_blog.BaseCreateBlogFragment
 import com.example.mypowerfulandroidapp.util.BottomNavController
 import com.example.mypowerfulandroidapp.util.setUpNavigation
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
-
 
 
 class MainActivity : BaseActivity(),
@@ -109,8 +111,25 @@ class MainActivity : BaseActivity(),
 
     override fun onGraphChange() {
         expandAppBar()
-        //TODO("what needs to happen when graph changes in activity?")
+        cancelActiveJobs()
 
+    }
+
+    private fun cancelActiveJobs() {
+        val fragments = bottomNavController.fragmentManager
+            .findFragmentById(bottomNavController.containerId)
+            ?.childFragmentManager
+            ?.fragments
+        if (fragments != null) {
+            for (fragment in fragments) {
+                when (fragment) {
+                    is BaseAccountFragment -> fragment.cancelActiveJobs()
+                    is BaseBlogFragment -> fragment.cancelActiveJobs()
+                    is BaseCreateBlogFragment -> fragment.cancelActiveJobs()
+                }
+            }
+        }
+        displayProgressBar(false)
     }
 
     override fun onReselectNavItem(navController: NavController, fragment: Fragment) =

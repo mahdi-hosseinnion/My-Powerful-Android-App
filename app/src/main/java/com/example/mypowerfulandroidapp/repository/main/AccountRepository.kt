@@ -9,6 +9,7 @@ import com.example.mypowerfulandroidapp.api.main.OpenApiMainService
 import com.example.mypowerfulandroidapp.models.AccountProperties
 import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.persistence.AccountPropertiesDao
+import com.example.mypowerfulandroidapp.repository.JobManager
 import com.example.mypowerfulandroidapp.repository.NetworkBoundResource
 import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.ui.DataState
@@ -30,10 +31,9 @@ constructor(
     val openApiMainService: OpenApiMainService,
     val accountPropertiesDao: AccountPropertiesDao,
     val sessionManager: SessionManager
-) {
+) : JobManager("AccountRepository") {
     private val TAG: String = "AppDebug"
 
-    private var repositoryJob: Job? = null
 
     fun getAccountProperties(authToken: AuthToken): LiveData<DataState<AccountViewState>> {
         return object :
@@ -89,8 +89,7 @@ constructor(
             }
 
             override fun setJob(job: Job) {
-                repositoryJob?.cancel()
-                repositoryJob = job
+                addJob("getAccountProperties", job)
             }
         }.getAsLiveData()
     }
@@ -147,8 +146,7 @@ constructor(
             }
 
             override fun setJob(job: Job) {
-                repositoryJob?.cancel()
-                repositoryJob = job
+                addJob("updateAccountProperties", job)
             }
         }.getAsLiveData()
     }
@@ -170,11 +168,11 @@ constructor(
             }
 
             override suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<GenericResponse>) {
-                withContext(Main){
+                withContext(Main) {
                     //finish with success response
                     onCompleteJob(
                         DataState.data(
-                            data=null,
+                            data = null,
                             response = Response(
                                 apiSuccessResponse.body.response,
                                 ResponseType.Toast()
@@ -203,14 +201,10 @@ constructor(
             }
 
             override fun setJob(job: Job) {
-                repositoryJob?.cancel()
-                repositoryJob = job
+                addJob("changePassword", job)
             }
         }.getAsLiveData()
     }
 
-    fun cancelActiveJobs() {
-        Log.d(TAG, "AuthRepository: Cancelling on-going jobs...")
-        repositoryJob?.cancel()
-    }
+
 }
