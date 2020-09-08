@@ -2,6 +2,7 @@ package com.example.mypowerfulandroidapp.api.main
 
 import androidx.lifecycle.LiveData
 import com.example.mypowerfulandroidapp.api.GenericResponse
+import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchResponse
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
 import com.example.mypowerfulandroidapp.models.AccountProperties
 import retrofit2.http.*
@@ -24,9 +25,16 @@ interface OpenApiMainService {
     @PUT("account/change_password/")
     @FormUrlEncoded
     fun changePassword(
-        @Header("Authorization")authorization: String,
-        @Field("old_password")oldPassword:String,
-        @Field("new_password")newPassword:String,
-        @Field("confirm_new_password")confirm_new_password:String
-    ):LiveData<GenericApiResponse<GenericResponse>>
+        @Header("Authorization") authorization: String,
+        @Field("old_password") oldPassword: String,
+        @Field("new_password") newPassword: String,
+        @Field("confirm_new_password") confirm_new_password: String
+    ): LiveData<GenericApiResponse<GenericResponse>>
+
+    @GET("blog/list")
+    fun searchListBlogPosts(
+        @Header("Authorization") authorization: String,
+        @Query("search") query: String
+    ): LiveData<GenericApiResponse<BlogListSearchResponse>>
+
 }

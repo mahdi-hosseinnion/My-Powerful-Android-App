@@ -1,15 +1,19 @@
 package com.example.mypowerfulandroidapp.ui.main.blog
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogStateEvent
 import kotlinx.android.synthetic.main.fragment_blog.*
+import kotlinx.coroutines.processNextEventInCurrentThread
 
 class BlogFragment : BaseBlogFragment() {
-
+    private val TAG = "BlogFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -23,6 +27,36 @@ class BlogFragment : BaseBlogFragment() {
         super.onViewCreated(view, savedInstanceState)
         goViewBlogFragment.setOnClickListener {
             findNavController().navigate(R.id.action_blogFragment_to_viewBlogFragment)
+        }
+
+        subscribeObservers()
+        executeSearchQuery()
+    }
+
+    private fun executeSearchQuery() {
+        viewModel.setQuery("")
+        viewModel.setStatEvent(BlogStateEvent.BlogSearchEvent())
+    }
+
+    private fun subscribeObservers() {
+        viewModel.dataState.observe(viewLifecycleOwner) { dataState ->
+            stateChangeListener.onDataStateChange(dataState)
+            dataState.data?.let { data ->
+                data.data?.let { event ->
+                    event.getContentIfNotHandled()?.let { blogViewState ->
+                        blogViewState.let {
+                            Log.d(
+                                TAG,
+                                "subscribeObservers: Data State blog list: ${it.blogFields.blogList}"
+                            )
+                            viewModel.setBlogListData(it.blogFields.blogList)
+                        }
+                    }
+                }
+            }
+        }
+        viewModel.viewState.observe(viewLifecycleOwner) {
+            Log.d(TAG, "subscribeObservers: ViewState blog list: ${it.blogFields.blogList}")
         }
     }
 }
