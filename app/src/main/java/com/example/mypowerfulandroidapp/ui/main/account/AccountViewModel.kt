@@ -7,6 +7,7 @@ import com.example.mypowerfulandroidapp.repository.main.AccountRepository
 import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.ui.BaseViewModel
 import com.example.mypowerfulandroidapp.ui.DataState
+import com.example.mypowerfulandroidapp.ui.Loading
 import com.example.mypowerfulandroidapp.ui.auth.state.AuthStateEvent
 import com.example.mypowerfulandroidapp.ui.main.account.state.AccountStateEvent
 import com.example.mypowerfulandroidapp.ui.main.account.state.AccountViewState
@@ -53,7 +54,12 @@ constructor(
                 } ?: AbsentLiveData.create()
             }
             is AccountStateEvent.None -> {
-                AbsentLiveData.create()
+                return object: LiveData<DataState<AccountViewState>>(){
+                    override fun onActive() {
+                        super.onActive()
+                        value = DataState(null, Loading(false), null)
+                    }
+                }
             }
 
         }
