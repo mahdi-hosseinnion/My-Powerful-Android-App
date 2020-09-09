@@ -79,4 +79,5 @@
     <string name="text_forgot_password">Forgot password</string>
     <string name="process_death_state">process_death_state</string>
     <string name="invalid_login_credentials">Invalid login</string>
+    <string name="no_more_results">No more results...</string>
 </resources>
