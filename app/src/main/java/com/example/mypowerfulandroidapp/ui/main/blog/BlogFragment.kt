@@ -22,8 +22,6 @@ class BlogFragment : BaseBlogFragment(),
     BlogListAdapter.Interaction {
     private val TAG = "BlogFragment"
 
-    @Inject
-    lateinit var requestManager: RequestManager
 
     lateinit var recyclerAdapter: BlogListAdapter
     override fun onCreateView(
@@ -99,7 +97,8 @@ class BlogFragment : BaseBlogFragment(),
     }
 
     override fun onItemSelected(position: Int, item: BlogPost) {
-        Log.d(TAG, "onItemSelected: the $position selected $item")
+        viewModel.setBlogPost(item)
+        findNavController().navigate(R.id.action_blogFragment_to_viewBlogFragment)
     }
 
     override fun onDestroyView() {

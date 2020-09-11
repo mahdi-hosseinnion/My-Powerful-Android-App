@@ -33,6 +33,9 @@ constructor(
                     )
                 } ?: AbsentLiveData.create()
             }
+            is BlogStateEvent.CheckAuthorOfBlogPost -> {
+                AbsentLiveData.create()
+            }
             is BlogStateEvent.None ->
                 AbsentLiveData.create()
         }
@@ -40,6 +43,18 @@ constructor(
 
     override fun initNewViewState(): BlogViewState {
         return BlogViewState()
+    }
+
+    fun setBlogPost(blogPost: BlogPost) {
+        val update = getCurrentViewStateOrNew()
+        update.viewBlogFields.blogPost = blogPost
+        _ViewState.value = update
+    }
+
+    fun setIsAuthorOfBlogPost(isAuthorOfBlogPost: Boolean) {
+        val update = getCurrentViewStateOrNew()
+        update.viewBlogFields.isAuthorOfBlogPost = isAuthorOfBlogPost
+        _ViewState.value = update
     }
 
     fun setQuery(query: String) {

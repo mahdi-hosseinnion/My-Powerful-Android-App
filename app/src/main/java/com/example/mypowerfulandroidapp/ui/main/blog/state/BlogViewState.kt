@@ -4,13 +4,18 @@ import com.example.mypowerfulandroidapp.models.BlogPost
 
 data class BlogViewState(
     //blogFragment vars
-    var blogFields: BlogFields = BlogFields()
-    //viewBlogFragment var
-
+    var blogFields: BlogFields = BlogFields(),
+    //ViewBlogFragment var
+    var viewBlogFields: ViewBlogFields = ViewBlogFields()
     //update blog fragment var
 ) {
     data class BlogFields(
         var blogList: List<BlogPost> = ArrayList<BlogPost>(),
         var searchQuery: String = ""
+    )
+
+    data class ViewBlogFields(
+        var blogPost: BlogPost? = null,
+        var isAuthorOfBlogPost: Boolean = false
     )
 }
