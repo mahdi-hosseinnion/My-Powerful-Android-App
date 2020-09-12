@@ -12,23 +12,28 @@ abstract class BaseViewModel<StateEvent, ViewState> : ViewModel() {
     val viewState: LiveData<ViewState>
         get() = _ViewState
 
-    val dataState:LiveData<DataState<ViewState>> =Transformations
-        .switchMap(_StateEvent){ stateEvent ->
+    val dataState: LiveData<DataState<ViewState>> = Transformations
+        .switchMap(_StateEvent) { stateEvent ->
             stateEvent?.let {
                 handleStateEvent(it)
             }
         }
 
-    fun setStatEvent(event: StateEvent){
-        _StateEvent.value=event
+    fun setStatEvent(event: StateEvent) {
+        _StateEvent.value = event
     }
 
-    fun getCurrentViewStateOrNew():ViewState{
+    fun setViewState(viewState: ViewState) {
+        _ViewState.value = viewState
+    }
+
+    fun getCurrentViewStateOrNew(): ViewState {
         return viewState.value?.let {
             it
-        }?:initNewViewState()
+        } ?: initNewViewState()
     }
-    abstract fun initNewViewState():ViewState
 
-    abstract fun handleStateEvent(stateEvent: StateEvent):LiveData<DataState<ViewState>>
+    abstract fun initNewViewState(): ViewState
+
+    abstract fun handleStateEvent(stateEvent: StateEvent): LiveData<DataState<ViewState>>
 }

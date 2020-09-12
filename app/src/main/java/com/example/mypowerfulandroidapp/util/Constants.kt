@@ -2,10 +2,11 @@ package com.example.mypowerfulandroidapp.util
 
 class Constants {
 
-    companion object{
+    companion object {
 
         const val BASE_URL = "https://open-api.xyz/api/"
         const val FORGOT_PASSWORD_URL = "https://open-api.xyz/password_reset/"
+        const val PAGINATION_PAGE_SIZE = 10
 
         const val NETWORK_TIMEOUT = 5000L
         const val TESTING_NETWORK_DELAY = 3000L // fake network delay for testing

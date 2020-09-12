@@ -1,4 +1,4 @@
-package com.example.mypowerfulandroidapp.ui.main.blog
+package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
@@ -28,8 +28,9 @@ constructor(
             is BlogStateEvent.BlogSearchEvent -> {
                 sessionManager.cachedToken.value?.let { authToken ->
                     blogRepository.searchBlogPosts(
-                        authToken,
-                        viewState.value!!.blogFields.searchQuery
+                        authToken = authToken,
+                        query = getSearchQuery(),
+                        page = getPage()
                     )
                 } ?: AbsentLiveData.create()
             }
@@ -37,40 +38,20 @@ constructor(
                 AbsentLiveData.create()
             }
             is BlogStateEvent.None ->
-                AbsentLiveData.create()
+                object : LiveData<DataState<BlogViewState>>() {
+                    override fun onActive() {
+                        super.onActive()
+                        value = DataState.loading(
+                            false,
+                            null
+                        )
+                    }
+                }
         }
     }
 
     override fun initNewViewState(): BlogViewState {
         return BlogViewState()
-    }
-
-    fun setBlogPost(blogPost: BlogPost) {
-        val update = getCurrentViewStateOrNew()
-        update.viewBlogFields.blogPost = blogPost
-        _ViewState.value = update
-    }
-
-    fun setIsAuthorOfBlogPost(isAuthorOfBlogPost: Boolean) {
-        val update = getCurrentViewStateOrNew()
-        update.viewBlogFields.isAuthorOfBlogPost = isAuthorOfBlogPost
-        _ViewState.value = update
-    }
-
-    fun setQuery(query: String) {
-        val update = getCurrentViewStateOrNew()
-//        if (update.blogFields.searchQuery == query) {
-//            return
-//        }
-        update.blogFields.searchQuery = query
-        _ViewState.value = update
-
-    }
-
-    fun setBlogListData(blogList: List<BlogPost>) {
-        val update = getCurrentViewStateOrNew()
-        update.blogFields.blogList = blogList
-        _ViewState.value = update
     }
 
     fun cancelActiveJobs() {
