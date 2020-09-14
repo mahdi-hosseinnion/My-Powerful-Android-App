@@ -8,6 +8,7 @@ import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchRespons
 import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.persistence.BlogPostDao
+import com.example.mypowerfulandroidapp.persistence.returnOrderedBlogQuery
 import com.example.mypowerfulandroidapp.repository.JobManager
 import com.example.mypowerfulandroidapp.repository.NetworkBoundResource
 import com.example.mypowerfulandroidapp.session.SessionManager
@@ -38,6 +39,7 @@ constructor(
     fun searchBlogPosts(
         authToken: AuthToken,
         query: String,
+        filterAndOrder: String,
         page: Int
     ): LiveData<DataState<BlogViewState>> {
         return object : NetworkBoundResource<BlogListSearchResponse, List<BlogPost>, BlogViewState>(
@@ -92,13 +94,16 @@ constructor(
                 return openApiMainService.searchListBlogPosts(
                     "Token ${authToken.token}",
                     query,
+                    filterAndOrder,
                     page
                 )
             }
 
             override fun loadFromCache(): LiveData<BlogViewState> {
-                return blogPostDao.getAllBlogPosts(
-                    query, page
+                return blogPostDao.returnOrderedBlogQuery(
+                    query,
+                    filterAndOrder,
+                    page
                 )
                     .switchMap {
                         object : LiveData<BlogViewState>() {

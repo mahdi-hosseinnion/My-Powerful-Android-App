@@ -1,6 +1,7 @@
 package com.example.mypowerfulandroidapp.ui.main.blog.state
 
 import com.example.mypowerfulandroidapp.models.BlogPost
+import com.example.mypowerfulandroidapp.persistence.BlogQueryUtils
 
 data class BlogViewState(
     //blogFragment vars
@@ -14,7 +15,9 @@ data class BlogViewState(
         var searchQuery: String = "",
         var page: Int = 1,
         var isQueryInProgress: Boolean = false,
-        var isQueryExhausted: Boolean = false
+        var isQueryExhausted: Boolean = false,
+        var filter: String = BlogQueryUtils.BLOG_FILTER_DATE_UPDATED,
+        var order: String = BlogQueryUtils.BLOG_ORDER_ASC
     )
 
     data class ViewBlogFields(
