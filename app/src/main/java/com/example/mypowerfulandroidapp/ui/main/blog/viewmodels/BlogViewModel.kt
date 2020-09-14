@@ -27,12 +27,12 @@ constructor(
 
     init {
         setBlogPostsFilter(
-            sharedPreferences.getString(BLOG_ORDER, BlogQueryUtils.BLOG_FILTER_DATE_UPDATED)
+            sharedPreferences.getString(BLOG_FILTER, BlogQueryUtils.BLOG_FILTER_DATE_UPDATED)
                 ?: BlogQueryUtils.BLOG_FILTER_DATE_UPDATED
 
         )
         setBlogPostsOrder(
-            sharedPreferences.getString(BLOG_FILTER, BlogQueryUtils.BLOG_ORDER_ASC)
+            sharedPreferences.getString(BLOG_ORDER, BlogQueryUtils.BLOG_ORDER_ASC)
                 ?: BlogQueryUtils.BLOG_ORDER_ASC
         )
     }
