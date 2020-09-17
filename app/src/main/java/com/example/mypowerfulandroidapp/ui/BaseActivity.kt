@@ -12,8 +12,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 abstract class BaseActivity : DaggerAppCompatActivity(),
-    DataStateChangeListener {
+    DataStateChangeListener,
+    UiCommunicationListener {
     private val TAG = "BaseActivity"
+
     override fun onDataStateChange(dataState: DataState<*>?) {
         dataState?.let { dataState ->
             GlobalScope.launch(Main) {
@@ -27,6 +29,27 @@ abstract class BaseActivity : DaggerAppCompatActivity(),
                     }
                 }
             }
+        }
+    }
+
+    override fun onUiMessageReceived(uiMessage: UIMessage) {
+        when (uiMessage.uiMessageType) {
+            is UiMessageType.Toast -> {
+                displayToast(uiMessage.message)
+            }
+            is UiMessageType.Dialog -> {
+                displayInfoDialog(uiMessage.message)
+            }
+            is UiMessageType.AreYouSureDialog -> {
+                areYouSureDialog(
+                    uiMessage.message,
+                    uiMessage.uiMessageType.callback
+                )
+            }
+            is UiMessageType.None -> {
+                Log.d(TAG, "onUiMessageReceived: None case message: ${uiMessage.message}")
+            }
+
         }
     }
 
@@ -77,11 +100,12 @@ abstract class BaseActivity : DaggerAppCompatActivity(),
     lateinit var sessionManager: SessionManager
 
     override fun hideSoftKeyboard() {
-        if(currentFocus!=null){
+        if (currentFocus != null) {
             val inputMethodManager = getSystemService(
 
-             Context.INPUT_METHOD_SERVICE)as InputMethodManager
-            inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken,0)
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
         }
     }
 }

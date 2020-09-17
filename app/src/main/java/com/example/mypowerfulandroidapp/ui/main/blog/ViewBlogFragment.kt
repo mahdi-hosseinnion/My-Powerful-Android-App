@@ -7,12 +7,14 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.models.BlogPost
-import com.example.mypowerfulandroidapp.ui.DataStateChangeListener
+import com.example.mypowerfulandroidapp.ui.*
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogStateEvent
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.isAuthorOfBlogPost
+import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.removeDeletedBlogPost
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.setIsAuthorOfBlogPost
 import com.example.mypowerfulandroidapp.util.DateUtils
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_HAS_PERMISSION_TO_EDIT
+import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.android.synthetic.main.fragment_view_blog.*
 
 
@@ -33,8 +35,26 @@ class ViewBlogFragment : BaseBlogFragment() {
         checkIsAuthorOfBlogPost()
         subscribeObservers()
         delete_button.setOnClickListener {
-            deleteBlogPost()
+            confirmDeleteRequest()
         }
+    }
+
+    private fun confirmDeleteRequest() {
+        val callback = object : AreYouSureCallback {
+            override fun proceed() {
+                deleteBlogPost()
+            }
+
+            override fun cancel() {
+                //ignore
+            }
+        }
+        uiCommunicationListener.onUiMessageReceived(
+            UIMessage(
+                getString(R.string.are_you_sure),
+                UiMessageType.AreYouSureDialog(callback)
+            )
+        )
     }
 
     private fun deleteBlogPost() {
@@ -57,6 +77,12 @@ class ViewBlogFragment : BaseBlogFragment() {
                         viewModel.setIsAuthorOfBlogPost(
                             viewState.viewBlogFields.isAuthorOfBlogPost
                         )
+                    }
+                }
+                data.response?.peekContent()?.let { response ->
+                    if (response.message == SUCCESS_BLOG_DELETED) {
+                        viewModel.removeDeletedBlogPost()
+                        findNavController().popBackStack()
                     }
                 }
             }

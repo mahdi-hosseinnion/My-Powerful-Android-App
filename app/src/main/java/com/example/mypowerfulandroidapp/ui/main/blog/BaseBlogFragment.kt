@@ -12,6 +12,7 @@ import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.ui.DataStateChangeListener
+import com.example.mypowerfulandroidapp.ui.UiCommunicationListener
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.BlogViewModel
 import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
 import dagger.android.support.DaggerFragment
@@ -21,6 +22,8 @@ import javax.inject.Inject
 abstract class BaseBlogFragment : DaggerFragment() {
     private val TAG = "BaseBlogFragment"
     lateinit var stateChangeListener: DataStateChangeListener
+
+    lateinit var uiCommunicationListener: UiCommunicationListener
 
     @Inject
     lateinit var requestManager: RequestManager
@@ -62,6 +65,11 @@ abstract class BaseBlogFragment : DaggerFragment() {
             stateChangeListener = context as DataStateChangeListener
         } catch (e: ClassCastException) {
             Log.e(TAG, "onAttach: $context should implement DataStateChangeListener", e)
+        }
+        try {
+            uiCommunicationListener = context as UiCommunicationListener
+        } catch (e: ClassCastException) {
+            Log.e(TAG, "onAttach: $context should implement UiCommunicationListener", e)
         }
     }
 }
