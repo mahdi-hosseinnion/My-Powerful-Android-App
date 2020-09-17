@@ -3,6 +3,7 @@ package com.example.mypowerfulandroidapp.repository.main
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.switchMap
+import com.example.mypowerfulandroidapp.api.GenericResponse
 import com.example.mypowerfulandroidapp.api.main.OpenApiMainService
 import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchResponse
 import com.example.mypowerfulandroidapp.models.AuthToken
@@ -12,19 +13,25 @@ import com.example.mypowerfulandroidapp.persistence.returnOrderedBlogQuery
 import com.example.mypowerfulandroidapp.repository.JobManager
 import com.example.mypowerfulandroidapp.repository.NetworkBoundResource
 import com.example.mypowerfulandroidapp.session.SessionManager
+import com.example.mypowerfulandroidapp.ui.Data
 import com.example.mypowerfulandroidapp.ui.DataState
+import com.example.mypowerfulandroidapp.ui.Response
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
+import com.example.mypowerfulandroidapp.util.AbsentLiveData
 import com.example.mypowerfulandroidapp.util.ApiSuccessResponse
 import com.example.mypowerfulandroidapp.util.Constants.Companion.PAGINATION_PAGE_SIZE
 import com.example.mypowerfulandroidapp.util.DateUtils
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
+import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_HAS_PERMISSION_TO_EDIT
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.IO_PARALLELISM_PROPERTY_NAME
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class BlogRepository
 @Inject
@@ -146,6 +153,59 @@ constructor(
                 addJob("searchBlogPosts", job)
             }
 
+        }.getAsLiveData()
+    }
+
+    fun isAuthorOfBlogPost(
+        authToken: AuthToken,
+        slug: String
+    ): LiveData<DataState<BlogViewState>> {
+        return object : NetworkBoundResource<GenericResponse, Any, BlogViewState>(
+            sessionManager.isConnectedToTheInternet(),
+            true,
+            true,
+            false
+        ) {
+            //not applicable
+            override suspend fun createCacheRequestAndReturn() {}
+
+            override suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<GenericResponse>) {
+                withContext(Main) {
+                    Log.d(TAG, "handleApiSuccessResponse: ${apiSuccessResponse.body.response}")
+                    var isAuthor = false
+                    if (apiSuccessResponse.body.response == RESPONSE_HAS_PERMISSION_TO_EDIT) {
+                        isAuthor = true
+
+                    }
+                    onCompleteJob(
+                        DataState.data(
+                            data = BlogViewState(
+                                viewBlogFields = BlogViewState.ViewBlogFields(
+                                    isAuthorOfBlogPost = isAuthor
+                                )
+                            )
+                        )
+                    )
+
+                }
+            }
+
+            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
+                return openApiMainService.isAuthorOfBlogPost(
+                    "Token ${authToken.token}",
+                    slug
+                )
+            }
+            //not applicable
+            override fun loadFromCache(): LiveData<BlogViewState> {
+                return AbsentLiveData.create()
+            }
+            //not applicable
+            override suspend fun updateLocalDb(cacheObject: Any?) {}
+
+            override fun setJob(job: Job) {
+                addJob("isAuthorOfBlogPost",job)
+            }
         }.getAsLiveData()
     }
 }

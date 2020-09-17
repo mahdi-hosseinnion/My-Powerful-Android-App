@@ -23,14 +23,31 @@ fun BlogViewModel.getQueryInProgress(): Boolean {
         return it.blogFields.isQueryInProgress
     }
 }
+
 fun BlogViewModel.getOrder(): String {
     getCurrentViewStateOrNew().let {
         return it.blogFields.order
     }
 }
+
 fun BlogViewModel.getFilter(): String {
     getCurrentViewStateOrNew().let {
         return it.blogFields.filter
+    }
+}
+
+fun BlogViewModel.getSlug(): String {
+    getCurrentViewStateOrNew().let {
+        it.viewBlogFields.blogPost?.let { blogPost ->
+            return blogPost.slug
+        }
+    }
+    return ""
+
+}
+fun BlogViewModel.isAuthorOfBlogPost():Boolean{
+    getCurrentViewStateOrNew().let {
+        return it.viewBlogFields.isAuthorOfBlogPost
     }
 }
 
