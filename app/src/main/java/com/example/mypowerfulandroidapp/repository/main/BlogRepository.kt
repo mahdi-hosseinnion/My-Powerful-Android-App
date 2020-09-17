@@ -1,6 +1,7 @@
 package com.example.mypowerfulandroidapp.repository.main
 
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.switchMap
 import com.example.mypowerfulandroidapp.api.GenericResponse
@@ -16,13 +17,16 @@ import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.ui.Data
 import com.example.mypowerfulandroidapp.ui.DataState
 import com.example.mypowerfulandroidapp.ui.Response
+import com.example.mypowerfulandroidapp.ui.ResponseType
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
 import com.example.mypowerfulandroidapp.util.AbsentLiveData
 import com.example.mypowerfulandroidapp.util.ApiSuccessResponse
 import com.example.mypowerfulandroidapp.util.Constants.Companion.PAGINATION_PAGE_SIZE
 import com.example.mypowerfulandroidapp.util.DateUtils
+import com.example.mypowerfulandroidapp.util.ErrorHandling.Companion.UNKNOWN_ERROR
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_HAS_PERMISSION_TO_EDIT
+import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.IO_PARALLELISM_PROPERTY_NAME
@@ -196,15 +200,83 @@ constructor(
                     slug
                 )
             }
+
             //not applicable
             override fun loadFromCache(): LiveData<BlogViewState> {
                 return AbsentLiveData.create()
             }
+
             //not applicable
             override suspend fun updateLocalDb(cacheObject: Any?) {}
 
             override fun setJob(job: Job) {
-                addJob("isAuthorOfBlogPost",job)
+                addJob("isAuthorOfBlogPost", job)
+            }
+        }.getAsLiveData()
+    }
+
+    fun deleteBlogPost(
+        authToken: AuthToken,
+        blogPost: BlogPost
+    ): LiveData<DataState<BlogViewState>> {
+        return object : NetworkBoundResource<GenericResponse, BlogPost, BlogViewState>(
+            sessionManager.isConnectedToTheInternet(),
+            true,
+            true,
+            false
+        ) {
+            //not applicable
+            override suspend fun createCacheRequestAndReturn() {
+
+            }
+
+            override suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<GenericResponse>) {
+                withContext(Main) {
+                    if (apiSuccessResponse.body.response == SUCCESS_BLOG_DELETED) {
+                        updateLocalDb(blogPost)
+                    } else {
+                        onCompleteJob(
+                            DataState.error(
+                                Response(
+                                    UNKNOWN_ERROR,
+                                    ResponseType.Dialog()
+                                )
+                            )
+                        )
+                    }
+                }
+
+            }
+
+            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
+                return openApiMainService.deleteBlogPost(
+                    "Token ${authToken.token}",
+                    blogPost.slug
+                )
+            }
+
+            override fun loadFromCache(): LiveData<BlogViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override suspend fun updateLocalDb(cacheObject: BlogPost?) {
+                cacheObject?.let {
+                    blogPostDao.deleteBlogPost(cacheObject)
+                    onCompleteJob(
+                        DataState.data(
+                            data = null,
+                            response = Response(
+                                SUCCESS_BLOG_DELETED,
+                                ResponseType.Toast()
+                            )
+                        )
+                    )
+                }
+
+            }
+
+            override fun setJob(job: Job) {
+                addJob("deleteBlogPost", job)
             }
         }.getAsLiveData()
     }

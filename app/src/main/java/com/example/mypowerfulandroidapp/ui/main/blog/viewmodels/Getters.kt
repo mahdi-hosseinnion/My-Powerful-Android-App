@@ -1,5 +1,7 @@
 package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
+import com.example.mypowerfulandroidapp.models.BlogPost
+
 fun BlogViewModel.getSearchQuery(): String {
     getCurrentViewStateOrNew().let {
         return it.blogFields.searchQuery
@@ -45,10 +47,24 @@ fun BlogViewModel.getSlug(): String {
     return ""
 
 }
-fun BlogViewModel.isAuthorOfBlogPost():Boolean{
+
+fun BlogViewModel.isAuthorOfBlogPost(): Boolean {
     getCurrentViewStateOrNew().let {
         return it.viewBlogFields.isAuthorOfBlogPost
     }
+}
+
+fun BlogViewModel.getBlogPost(): BlogPost {
+    getCurrentViewStateOrNew().let {
+        it.viewBlogFields.blogPost?.let {
+            return it
+        }
+    }
+    return getDummyBlogPost()
+}
+
+fun BlogViewModel.getDummyBlogPost(): BlogPost {
+    return BlogPost(-1, "", "", "", "", 0, "")
 }
 
 

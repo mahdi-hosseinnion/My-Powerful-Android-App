@@ -32,6 +32,15 @@ class ViewBlogFragment : BaseBlogFragment() {
         setHasOptionsMenu(true)
         checkIsAuthorOfBlogPost()
         subscribeObservers()
+        delete_button.setOnClickListener {
+            deleteBlogPost()
+        }
+    }
+
+    private fun deleteBlogPost() {
+        viewModel.setStatEvent(
+            BlogStateEvent.DeleteBlogPostEvent()
+        )
     }
 
     private fun checkIsAuthorOfBlogPost() {
