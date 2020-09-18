@@ -8,8 +8,8 @@ class Constants {
         const val FORGOT_PASSWORD_URL = "https://open-api.xyz/password_reset/"
         const val PAGINATION_PAGE_SIZE = 10
 
-        const val NETWORK_TIMEOUT = 5000L
-        const val TESTING_NETWORK_DELAY = 3000L // fake network delay for testing
+        const val NETWORK_TIMEOUT = 0L
+        const val TESTING_NETWORK_DELAY = 0L // fake network delay for testing
         const val TESTING_CACHE_DELAY = 0L // fake cache delay for testing
     }
 }

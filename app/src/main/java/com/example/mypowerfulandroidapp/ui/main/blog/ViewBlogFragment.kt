@@ -2,25 +2,26 @@ package com.example.mypowerfulandroidapp.ui.main.blog
 
 import android.opengl.Visibility
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import androidx.core.net.toUri
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.ui.*
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogStateEvent
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.isAuthorOfBlogPost
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.removeDeletedBlogPost
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.setIsAuthorOfBlogPost
+import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.*
 import com.example.mypowerfulandroidapp.util.DateUtils
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_HAS_PERMISSION_TO_EDIT
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.android.synthetic.main.fragment_view_blog.*
+import java.lang.Exception
 
 
 class ViewBlogFragment : BaseBlogFragment() {
 
-
+    private val TAG = "ViewBlogFragment"
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -126,10 +127,24 @@ class ViewBlogFragment : BaseBlogFragment() {
         if (viewModel.isAuthorOfBlogPost()) {
             when (item.itemId) {
                 R.id.edit -> {
-                    findNavController().navigate(R.id.action_viewBlogFragment_to_updateBlogFragment)
+                    navUpdateBlogFragment()
                 }
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun navUpdateBlogFragment() {
+        try {
+            viewModel.setUpdatedBlogFields(
+                viewModel.getBlogPost().title,
+                viewModel.getBlogPost().body,
+                viewModel.getBlogPost().image.toUri()
+            )
+            findNavController().navigate(R.id.action_viewBlogFragment_to_updateBlogFragment)
+        } catch (e: Exception) {
+            Log.e(TAG, "navUpdateBlogFragment: ${e.message}", e)
+        }
+
     }
 }

@@ -1,11 +1,11 @@
 package com.example.mypowerfulandroidapp.repository.main
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.switchMap
 import com.example.mypowerfulandroidapp.api.GenericResponse
 import com.example.mypowerfulandroidapp.api.main.OpenApiMainService
+import com.example.mypowerfulandroidapp.api.main.responses.BlogCreateUpdateResponse
 import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchResponse
 import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.models.BlogPost
@@ -14,7 +14,6 @@ import com.example.mypowerfulandroidapp.persistence.returnOrderedBlogQuery
 import com.example.mypowerfulandroidapp.repository.JobManager
 import com.example.mypowerfulandroidapp.repository.NetworkBoundResource
 import com.example.mypowerfulandroidapp.session.SessionManager
-import com.example.mypowerfulandroidapp.ui.Data
 import com.example.mypowerfulandroidapp.ui.DataState
 import com.example.mypowerfulandroidapp.ui.Response
 import com.example.mypowerfulandroidapp.ui.ResponseType
@@ -29,11 +28,11 @@ import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.IO_PARALLELISM_PROPERTY_NAME
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 
@@ -176,7 +175,8 @@ constructor(
             override suspend fun handleApiSuccessResponse(apiSuccessResponse: ApiSuccessResponse<GenericResponse>) {
                 withContext(Main) {
                     Log.d(TAG, "handleApiSuccessResponse: ${apiSuccessResponse.body.response}")
-                    var isAuthor = false
+                    //TODO(this line should be false :::BUG:::)
+                    var isAuthor = true
                     if (apiSuccessResponse.body.response == RESPONSE_HAS_PERMISSION_TO_EDIT) {
                         isAuthor = true
 
@@ -280,4 +280,87 @@ constructor(
             }
         }.getAsLiveData()
     }
+
+    fun updateBlogPost(
+        authToken: AuthToken,
+        slug: String,
+        title: RequestBody,
+        body: RequestBody,
+        image: MultipartBody.Part?
+    ): LiveData<DataState<BlogViewState>> {
+        return object : NetworkBoundResource<BlogCreateUpdateResponse, BlogPost, BlogViewState>(
+            sessionManager.isConnectedToTheInternet(),
+            true,
+            true,
+            false
+        ) {
+            //not applicable
+            override suspend fun createCacheRequestAndReturn() {
+
+            }
+
+            override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<BlogCreateUpdateResponse>) {
+                Log.e(TAG, "handleApiSuccessResponse: ${response.body.response}")
+
+                val updatedBlogPost = BlogPost(
+                    pk = response.body.pk,
+                    title = response.body.title,
+                    slug = response.body.slug,
+                    body = response.body.body,
+                    image = response.body.image,
+                    date_updated = DateUtils.convertServerStringDateToLong(response.body.image),
+                    username = response.body.username
+                )
+                updateLocalDb(updatedBlogPost)
+                withContext(Main) {
+                    onCompleteJob(
+                        DataState.data(
+                            data = BlogViewState(
+                                viewBlogFields = BlogViewState.ViewBlogFields(
+                                    updatedBlogPost
+                                )
+
+                            ),
+                            response = Response(
+                                message = response.body.response,
+                                responseType = ResponseType.Toast()
+                            )
+                        )
+                    )
+                }
+            }
+
+            override fun createCall(): LiveData<GenericApiResponse<BlogCreateUpdateResponse>> {
+                return openApiMainService.updateBlogPost(
+                    "Token ${authToken.token}",
+                    slug,
+                    title,
+                    body,
+                    image
+                )
+            }
+
+            //not applicable
+            override fun loadFromCache(): LiveData<BlogViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override suspend fun updateLocalDb(cacheObject: BlogPost?) {
+                cacheObject?.let {
+                    blogPostDao.updateBlogPost(
+                        it.pk,
+                        it.title,
+                        it.body,
+                        it.image
+                    )
+                }
+            }
+
+            override fun setJob(job: Job) {
+                addJob("updateBlogPost", job)
+            }
+        }.getAsLiveData()
+    }
+
+
 }

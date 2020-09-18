@@ -1,5 +1,6 @@
 package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
+import android.net.Uri
 import com.example.mypowerfulandroidapp.models.BlogPost
 
 fun BlogViewModel.setQuery(query: String) {
@@ -64,3 +65,17 @@ fun BlogViewModel.removeDeletedBlogPost() {
     setBlogListData(list)
 }
 
+
+fun BlogViewModel.setUpdatedBlogFields(
+    title: String?,
+    body: String?,
+    uri: Uri?
+) {
+    val update = getCurrentViewStateOrNew()
+    val newUpdatedBlogFields = update.updateBlogFields
+    title?.let { newUpdatedBlogFields.updateBlogTitle = it }
+    body?.let { newUpdatedBlogFields.updateBlogBody = it }
+    uri?.let { newUpdatedBlogFields.updateBlogImage = it }
+    update.updateBlogFields = newUpdatedBlogFields
+    setViewState(update)
+}

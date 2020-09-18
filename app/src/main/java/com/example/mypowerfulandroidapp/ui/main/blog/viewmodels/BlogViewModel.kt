@@ -2,6 +2,7 @@ package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.persistence.BlogQueryUtils
@@ -14,6 +15,8 @@ import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
 import com.example.mypowerfulandroidapp.util.AbsentLiveData
 import com.example.mypowerfulandroidapp.util.PreferenceKeys.Companion.BLOG_FILTER
 import com.example.mypowerfulandroidapp.util.PreferenceKeys.Companion.BLOG_ORDER
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 class BlogViewModel
@@ -57,11 +60,30 @@ constructor(
                     )
                 } ?: AbsentLiveData.create()
             }
-            is BlogStateEvent.DeleteBlogPostEvent->{
+            is BlogStateEvent.DeleteBlogPostEvent -> {
                 sessionManager.cachedToken.value?.let { authToken ->
                     blogRepository.deleteBlogPost(
                         authToken = authToken,
                         blogPost = getBlogPost()
+                    )
+                } ?: AbsentLiveData.create()
+            }
+            is BlogStateEvent.UpdateBlogPostEvent -> {
+                sessionManager.cachedToken.value?.let { authToken ->
+                    val title = RequestBody.create(
+                        MediaType.parse("text/plain"),
+                        stateEvent.title
+                    )
+                    val body = RequestBody.create(
+                        MediaType.parse("text/plain"),
+                        stateEvent.body
+                    )
+                    blogRepository.updateBlogPost(
+                        authToken = authToken,
+                        slug = getSlug(),
+                        title = title,
+                        body = body,
+                        image = stateEvent.image
                     )
                 } ?: AbsentLiveData.create()
             }

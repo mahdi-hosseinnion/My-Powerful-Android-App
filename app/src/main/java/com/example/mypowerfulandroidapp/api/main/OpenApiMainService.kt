@@ -1,10 +1,14 @@
 package com.example.mypowerfulandroidapp.api.main
 
+import android.graphics.drawable.AnimatedImageDrawable
 import androidx.lifecycle.LiveData
 import com.example.mypowerfulandroidapp.api.GenericResponse
+import com.example.mypowerfulandroidapp.api.main.responses.BlogCreateUpdateResponse
 import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchResponse
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
 import com.example.mypowerfulandroidapp.models.AccountProperties
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 interface OpenApiMainService {
@@ -50,5 +54,15 @@ interface OpenApiMainService {
         @Header("Authorization") authorization: String,
         @Path("slug") slug: String
     ): LiveData<GenericApiResponse<GenericResponse>>
+
+    @Multipart
+    @PUT("blog/{slug}/update")
+    fun updateBlogPost(
+        @Header("Authorization") authorization: String,
+        @Path("slug") slug: String,
+        @Part("title") title: RequestBody,
+        @Part("body") body: RequestBody,
+        @Part image: MultipartBody.Part?
+    ):LiveData<GenericApiResponse<BlogCreateUpdateResponse>>
 
 }
