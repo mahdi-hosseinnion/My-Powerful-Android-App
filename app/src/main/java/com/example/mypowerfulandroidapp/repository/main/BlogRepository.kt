@@ -302,32 +302,52 @@ constructor(
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<BlogCreateUpdateResponse>) {
                 Log.e(TAG, "handleApiSuccessResponse: ${response.body.response}")
 
-                val updatedBlogPost = BlogPost(
-                    pk = response.body.pk,
-                    title = response.body.title,
-                    slug = response.body.slug,
-                    body = response.body.body,
-                    image = response.body.image,
-                    date_updated = DateUtils.convertServerStringDateToLong(response.body.image),
-                    username = response.body.username
-                )
-                updateLocalDb(updatedBlogPost)
-                withContext(Main) {
-                    onCompleteJob(
-                        DataState.data(
-                            data = BlogViewState(
-                                viewBlogFields = BlogViewState.ViewBlogFields(
-                                    updatedBlogPost
-                                )
+                if (response.body.title == "null") {
 
-                            ),
-                            response = Response(
-                                message = response.body.response,
-                                responseType = ResponseType.Toast()
+                    val updatedBlogPost = BlogPost(
+                        pk = response.body.pk,
+                        title = response.body.title,
+                        slug = response.body.slug,
+                        body = response.body.body,
+                        image = response.body.image,
+                        date_updated = DateUtils.convertServerStringDateToLong(response.body.image),
+                        username = response.body.username
+                    )
+                    updateLocalDb(updatedBlogPost)
+                    withContext(Main) {
+                        onCompleteJob(
+                            DataState.data(
+                                data = BlogViewState(
+                                    viewBlogFields = BlogViewState.ViewBlogFields(
+                                        updatedBlogPost
+                                    )
+
+                                ),
+                                response = Response(
+                                    message = response.body.response,
+                                    responseType = ResponseType.Toast()
+                                )
                             )
                         )
-                    )
+                    }
+                } else {
+                    withContext(Main) {
+                        onCompleteJob(
+                            DataState.data(
+                                data = BlogViewState(
+                                    viewBlogFields = BlogViewState.ViewBlogFields(
+                                        blogPost = BlogPost(-1,"","","","",0L,"")
+                                    )
+                                ),
+                                response = Response(
+                                    message = response.body.response,
+                                    responseType = ResponseType.Toast()
+                                )
+                            )
+                        )
+                    }
                 }
+
             }
 
             override fun createCall(): LiveData<GenericApiResponse<BlogCreateUpdateResponse>> {

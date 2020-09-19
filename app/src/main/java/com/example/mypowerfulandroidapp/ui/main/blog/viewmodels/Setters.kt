@@ -1,6 +1,7 @@
 package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
 import android.net.Uri
+import androidx.core.net.toUri
 import com.example.mypowerfulandroidapp.models.BlogPost
 
 fun BlogViewModel.setQuery(query: String) {
@@ -78,4 +79,26 @@ fun BlogViewModel.setUpdatedBlogFields(
     uri?.let { newUpdatedBlogFields.updateBlogImage = it }
     update.updateBlogFields = newUpdatedBlogFields
     setViewState(update)
+}
+
+fun BlogViewModel.updateListItem(newBlogPost: BlogPost){
+    val update=getCurrentViewStateOrNew()
+    val list=update.blogFields.blogList.toMutableList()
+    for (i in 0 until list.size){
+        if (list[i].pk==newBlogPost.pk){
+            list[i]=newBlogPost
+            break
+        }
+    }
+    update.blogFields.blogList=list
+    setViewState(update)
+}
+
+fun BlogViewModel.onBlogPostUpdateSuccess(blogPost:BlogPost){
+    //update updateBlogFragment
+    setUpdatedBlogFields(blogPost.title,blogPost.body,blogPost.image.toUri())
+    //update ViewBlogFragment
+    setBlogPost(blogPost)
+    //update BlogFragment
+    updateListItem(blogPost)
 }

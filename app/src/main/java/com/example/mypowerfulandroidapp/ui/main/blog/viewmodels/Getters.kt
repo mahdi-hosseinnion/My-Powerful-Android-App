@@ -1,5 +1,7 @@
 package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
+import android.net.Uri
+import androidx.core.net.toUri
 import com.example.mypowerfulandroidapp.models.BlogPost
 
 fun BlogViewModel.getSearchQuery(): String {
@@ -65,6 +67,15 @@ fun BlogViewModel.getBlogPost(): BlogPost {
 
 fun BlogViewModel.getDummyBlogPost(): BlogPost {
     return BlogPost(-1, "", "", "", "", 0, "")
+}
+
+fun BlogViewModel.getUpdatedBlogUri(): Uri? {
+    getCurrentViewStateOrNew().let { viewState ->
+        viewState.updateBlogFields.updateBlogImage?.let {
+            return it
+        }
+    }
+    return null
 }
 
 

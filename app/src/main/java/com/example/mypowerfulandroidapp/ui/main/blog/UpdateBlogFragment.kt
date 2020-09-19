@@ -4,8 +4,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogStateEvent
+import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.onBlogPostUpdateSuccess
+import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.setUpdatedBlogFields
 import kotlinx.android.synthetic.main.fragment_update_blog.*
 import kotlinx.android.synthetic.main.layout_blog_filter.*
 import okhttp3.MultipartBody
@@ -34,7 +37,9 @@ class UpdateBlogFragment : BaseBlogFragment() {
                 data.data?.getContentIfNotHandled()?.let { blogViewState ->
                     //if this is not null, the blogPost was updated
                     blogViewState.viewBlogFields.blogPost?.let {
-                        //TODO("onBlogPostUpdated")
+                        viewModel.onBlogPostUpdateSuccess(it).let {
+                            findNavController().popBackStack()
+                        }
                     }
                 }
             }
@@ -87,5 +92,14 @@ class UpdateBlogFragment : BaseBlogFragment() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.setUpdatedBlogFields(
+            blog_title.text.toString(),
+            blog_body.text.toString(),
+            null
+        )
     }
 }
