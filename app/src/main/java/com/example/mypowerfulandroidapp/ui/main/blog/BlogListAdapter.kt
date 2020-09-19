@@ -127,6 +127,17 @@ class BlogListAdapter(
         differ.submitList(newList)
     }
 
+    fun preloadGlideImages(list: List<BlogPost>?) {
+        list?.let { list ->
+            for (blogPost in list) {
+                requestManager
+                    .load(blogPost.image)
+                    .preload()
+            }
+        }
+
+    }
+
     class BlogViewHolder
     constructor(
         private val requestManager: RequestManager,

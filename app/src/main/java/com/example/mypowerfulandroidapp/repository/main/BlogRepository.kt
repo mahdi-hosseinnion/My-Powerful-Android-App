@@ -176,7 +176,7 @@ constructor(
                 withContext(Main) {
                     Log.d(TAG, "handleApiSuccessResponse: ${apiSuccessResponse.body.response}")
                     //TODO(this line should be false :::BUG:::)
-                    var isAuthor = true
+                    var isAuthor = false//fixed
                     if (apiSuccessResponse.body.response == RESPONSE_HAS_PERMISSION_TO_EDIT) {
                         isAuthor = true
 

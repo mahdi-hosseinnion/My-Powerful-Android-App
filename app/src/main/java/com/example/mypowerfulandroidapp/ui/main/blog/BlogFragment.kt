@@ -100,10 +100,16 @@ class BlogFragment : BaseBlogFragment(),
                 TAG,
                 "subscribeObservers: ViewState blog list: ${blogViewState.blogFields.blogList}"
             )
-            recyclerAdapter.submitList(
-                blogViewState.blogFields.blogList,
-                blogViewState.blogFields.isQueryExhausted
-            )
+            recyclerAdapter.apply {
+                preloadGlideImages(
+                    blogViewState.blogFields.blogList
+                )
+                submitList(
+                    blogViewState.blogFields.blogList,
+                    blogViewState.blogFields.isQueryExhausted
+                )
+            }
+
         }
     }
 
