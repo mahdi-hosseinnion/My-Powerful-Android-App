@@ -11,5 +11,9 @@ class Constants {
         const val NETWORK_TIMEOUT = 0L
         const val TESTING_NETWORK_DELAY = 0L // fake network delay for testing
         const val TESTING_CACHE_DELAY = 0L // fake cache delay for testing
+
+        const val GALLERY_REQUEST_CODE:Int=201
+        const val PERMISSION_REQUEST_READ_STORAGE:Int=301
+        const val CROP_IMAGE_INTENT_MODE:Int=401
     }
 }
