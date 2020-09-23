@@ -2,8 +2,10 @@ package com.example.mypowerfulandroidapp.di.main
 
 import androidx.lifecycle.ViewModel
 import com.example.mypowerfulandroidapp.di.ViewModelKey
+import com.example.mypowerfulandroidapp.repository.main.CreateBlogRepository
 import com.example.mypowerfulandroidapp.ui.main.account.AccountViewModel
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.BlogViewModel
+import com.example.mypowerfulandroidapp.ui.main.create_blog.CreateBlogViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -16,8 +18,14 @@ abstract class MainViewModelModule {
     @IntoMap
     @ViewModelKey(AccountViewModel::class)
     abstract fun bindAuthViewModel(accountViewModel: AccountViewModel): ViewModel
+
     @Binds
     @IntoMap
     @ViewModelKey(BlogViewModel::class)
     abstract fun bindBlogViewModel(blogViewModel: BlogViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(CreateBlogViewModel::class)
+    abstract fun bindCreateBlogViewModel(createBlogViewModel: CreateBlogViewModel): ViewModel
 }
