@@ -63,6 +63,14 @@ interface OpenApiMainService {
         @Part("title") title: RequestBody,
         @Part("body") body: RequestBody,
         @Part image: MultipartBody.Part?
-    ):LiveData<GenericApiResponse<BlogCreateUpdateResponse>>
+    ): LiveData<GenericApiResponse<BlogCreateUpdateResponse>>
 
+    @Multipart
+    @POST("blog/create")
+    fun createBlogPost(
+        @Header("Authorization") authorization: String,
+        @Part("title") title: RequestBody,
+        @Part("body") body: RequestBody,
+        @Part image: MultipartBody.Part?
+    ): LiveData<GenericApiResponse<BlogCreateUpdateResponse>>
 }

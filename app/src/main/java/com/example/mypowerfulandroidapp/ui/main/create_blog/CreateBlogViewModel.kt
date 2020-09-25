@@ -3,6 +3,7 @@ package com.example.mypowerfulandroidapp.ui.main.create_blog
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.example.mypowerfulandroidapp.models.AccountProperties
 import com.example.mypowerfulandroidapp.repository.main.CreateBlogRepository
 import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.ui.BaseViewModel
@@ -11,6 +12,8 @@ import com.example.mypowerfulandroidapp.ui.Loading
 import com.example.mypowerfulandroidapp.ui.main.create_blog.state.CreateBlogStateEvent
 import com.example.mypowerfulandroidapp.ui.main.create_blog.state.CreateBlogViewState
 import com.example.mypowerfulandroidapp.util.AbsentLiveData
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 class CreateBlogViewModel
@@ -24,7 +27,23 @@ constructor(
     override fun handleStateEvent(stateEvent: CreateBlogStateEvent): LiveData<DataState<CreateBlogViewState>> {
         return when (stateEvent) {
             is CreateBlogStateEvent.CreateNewBlogPostEvent -> {
-                AbsentLiveData.create()
+                sessionManager.cachedToken.value?.let {
+                    val title = RequestBody.create(
+                        MediaType.parse("text/plain"),
+                        stateEvent.title
+                    )
+                    val body = RequestBody.create(
+                        MediaType.parse("text/plain"),
+                        stateEvent.body
+                    )
+                    createBlogRepository.createNewBlogPost(
+                        it,
+                        title,
+                        body,
+                        stateEvent.image
+                    )
+
+                } ?: AbsentLiveData.create()
             }
             is CreateBlogStateEvent.None -> {
                 liveData {
@@ -52,6 +71,14 @@ constructor(
         val update = getCurrentViewStateOrNew()
         update.blogFields = CreateBlogViewState.NewBlogFields()
         setViewState(update)
+    }
+
+    fun getImageUri(): Uri? {
+        getCurrentViewStateOrNew().let { viewState ->
+            viewState?.blogFields.let {
+                return it.image
+            }
+        }
     }
 
     fun cancelActiveJobs() {

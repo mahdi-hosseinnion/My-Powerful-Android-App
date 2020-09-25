@@ -6,19 +6,24 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.lifecycle.Observer
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.ui.*
+import com.example.mypowerfulandroidapp.ui.main.create_blog.state.CreateBlogStateEvent
 import com.example.mypowerfulandroidapp.ui.main.create_blog.state.CreateBlogViewState
 import com.example.mypowerfulandroidapp.util.Constants
 import com.example.mypowerfulandroidapp.util.Constants.Companion.GALLERY_REQUEST_CODE
+import com.example.mypowerfulandroidapp.util.ErrorHandling.Companion.ERROR_MUST_SELECT_IMAGE
 import com.example.mypowerfulandroidapp.util.ErrorHandling.Companion.ERROR_SOMETHING_WRONG_WITH_IMAGE
+import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.SUCCESS_BLOG_CREATED
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.fragment_create_blog.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
 
 class CreateBlogFragment : BaseCreateBlogFragment() {
 
@@ -32,6 +37,7 @@ class CreateBlogFragment : BaseCreateBlogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         blog_image.setOnClickListener {
             if (stateChangeListener.isStoragePermissionGranted()) {
                 pickFromGallery()
@@ -48,6 +54,15 @@ class CreateBlogFragment : BaseCreateBlogFragment() {
     private fun subscribeObservers() {
         viewModel.dataState.observe(viewLifecycleOwner, Observer { dataState ->
             stateChangeListener.onDataStateChange(dataState)
+            dataState?.let { dataState ->
+                dataState.data?.response?.let { event ->
+                    event.peekContent().message?.let { message ->
+                        if (message == SUCCESS_BLOG_CREATED) {
+                            viewModel.clearNewBlogFields()
+                        }
+                    }
+                }
+            }
         })
         viewModel.viewState.observe(viewLifecycleOwner, Observer { viewState ->
             viewState?.let { viewState ->
@@ -142,5 +157,65 @@ class CreateBlogFragment : BaseCreateBlogFragment() {
             body = blog_body.text.toString(),
             image = null
         )
+    }
+
+    fun publishBlog() {
+        var multiPartBody: MultipartBody.Part? = null
+
+        viewModel.getImageUri()?.let { imageUri ->
+            imageUri.path?.let { filePath ->
+                val imageFile = File(filePath)
+                Log.d(TAG, "publishBlog: imageFile: $imageFile")
+                var requestBody = RequestBody.create(
+                    MediaType.parse("image/*"),
+                    imageFile
+                )
+                multiPartBody = MultipartBody.Part.createFormData(
+                    "image",
+                    imageFile.name,
+                    requestBody
+                )
+            }
+        }
+        multiPartBody?.let { multiPartBody ->
+            viewModel.setStatEvent(
+                CreateBlogStateEvent.CreateNewBlogPostEvent(
+                    blog_title.text.toString(),
+                    blog_body.text.toString(),
+                    multiPartBody
+                )
+            )
+        } ?: showErrorMessage(ERROR_MUST_SELECT_IMAGE)
+
+        stateChangeListener.hideSoftKeyboard()
+
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.publish_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.publish) {
+            val callback = object : AreYouSureCallback {
+                override fun proceed() {
+                    publishBlog()
+                }
+
+                override fun cancel() {
+                    //ignore
+                }
+            }
+            uiCommunicationListener.onUiMessageReceived(
+                UIMessage(
+                    getString(R.string.are_you_sure_publish),
+                    UiMessageType.AreYouSureDialog(callback)
+                )
+            )
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

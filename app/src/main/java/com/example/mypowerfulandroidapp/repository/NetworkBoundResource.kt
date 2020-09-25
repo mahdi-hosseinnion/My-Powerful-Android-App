@@ -69,7 +69,7 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
             withContext(Main) {
                 //make network call
                 val apiResponse = createCall()
-                Log.d(TAG, "Response: $apiResponse")
+                Log.d(TAG, "Response: ${apiResponse.value}")
                 result.addSource(apiResponse) { response ->
                     result.removeSource(apiResponse)
                     coroutineScope.launch {
@@ -80,7 +80,7 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
         }
         //for network timeout
         GlobalScope.launch(IO) {
-            delay(NETWORK_TIMEOUT + TESTING_NETWORK_DELAY)
+            delay(NETWORK_TIMEOUT )
             if (!job.isCompleted) {
                 Log.d(TAG, "NetworkBoundResource: NetWork TimeOUT...")
                 job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))
@@ -100,9 +100,11 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
     private suspend fun handleApiResponse(response: GenericApiResponse<ResponseObject>) {
         when (response) {
             is ApiSuccessResponse -> {
+                Log.d(TAG, "handleApiResponse: 00mm ApiSuccessResponse")
                 handleApiSuccessResponse(response)
             }
             is ApiErrorResponse -> {
+                Log.d(TAG, "handleApiResponse: 00mm ApiErrorResponse")
                 Log.e(TAG, "handleApiResponse: ERROR: ${response.errorMessage}")
                 onErrorReturn(response.errorMessage, true, false)
             }
