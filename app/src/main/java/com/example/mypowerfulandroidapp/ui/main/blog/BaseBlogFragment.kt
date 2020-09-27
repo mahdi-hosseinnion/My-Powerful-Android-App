@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.di.Injectable
 import com.example.mypowerfulandroidapp.ui.DataStateChangeListener
 import com.example.mypowerfulandroidapp.ui.UiCommunicationListener
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.BlogViewModel
@@ -19,7 +21,7 @@ import dagger.android.support.DaggerFragment
 import java.lang.ClassCastException
 import javax.inject.Inject
 
-abstract class BaseBlogFragment : DaggerFragment() {
+abstract class BaseBlogFragment :  Fragment(), Injectable {
     private val TAG = "BaseBlogFragment"
     lateinit var stateChangeListener: DataStateChangeListener
 
