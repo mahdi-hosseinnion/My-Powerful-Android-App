@@ -21,6 +21,9 @@ abstract class BaseActivity : DaggerAppCompatActivity(),
     UiCommunicationListener {
     private val TAG = "BaseActivity"
 
+
+    @Inject
+    lateinit var sessionManager: SessionManager
     override fun onDataStateChange(dataState: DataState<*>?) {
         dataState?.let { dataState ->
             GlobalScope.launch(Main) {
@@ -101,8 +104,6 @@ abstract class BaseActivity : DaggerAppCompatActivity(),
 
     abstract fun displayProgressBar(loading: Boolean)
 
-    @Inject
-    lateinit var sessionManager: SessionManager
 
     override fun hideSoftKeyboard() {
         if (currentFocus != null) {

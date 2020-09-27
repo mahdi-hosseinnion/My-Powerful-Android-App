@@ -54,7 +54,7 @@ constructor(
 
         }
     }
-    private fun setValue(authToken: AuthToken?) {
+    public fun setValue(authToken: AuthToken?) {
         Log.d(TAG, "setValue: login ...")
         GlobalScope.launch(Main) {
             if (_cachedToken.value != authToken) {
@@ -71,4 +71,5 @@ constructor(
         }
         return false
     }
+
 }

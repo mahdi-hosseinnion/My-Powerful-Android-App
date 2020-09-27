@@ -72,18 +72,20 @@ class ViewBlogFragment : BaseBlogFragment() {
     private fun subscribeObservers() {
         viewModel.dataState.observe(viewLifecycleOwner, Observer { dataState ->
             stateChangeListener.onDataStateChange(dataState)
-            dataState.data?.let { data ->
-                data.data?.let {
-                    it.getContentIfNotHandled()?.let { viewState ->
-                        viewModel.setIsAuthorOfBlogPost(
-                            viewState.viewBlogFields.isAuthorOfBlogPost
-                        )
+            if (dataState != null) {
+                dataState.data?.let { data ->
+                    data.data?.let {
+                        it.getContentIfNotHandled()?.let { viewState ->
+                            viewModel.setIsAuthorOfBlogPost(
+                                viewState.viewBlogFields.isAuthorOfBlogPost
+                            )
+                        }
                     }
-                }
-                data.response?.peekContent()?.let { response ->
-                    if (response.message == SUCCESS_BLOG_DELETED) {
-                        viewModel.removeDeletedBlogPost()
-                        findNavController().popBackStack()
+                    data.response?.peekContent()?.let { response ->
+                        if (response.message == SUCCESS_BLOG_DELETED) {
+                            viewModel.removeDeletedBlogPost()
+                            findNavController().popBackStack()
+                        }
                     }
                 }
             }
@@ -104,7 +106,7 @@ class ViewBlogFragment : BaseBlogFragment() {
     }
 
     private fun setBlogProperties(blogPost: BlogPost) {
-        requestManager
+        mainDependencyProvider.getGlideRequestManager()
             .load(blogPost.image)
             .into(blog_image)
         blog_title.text = blogPost.title

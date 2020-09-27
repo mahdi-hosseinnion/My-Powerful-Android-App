@@ -75,7 +75,7 @@ class CreateBlogFragment : BaseCreateBlogFragment() {
 
     private fun setBlogProperties(title: String?, body: String?, image: Uri?) {
         image?.let {
-            requestManager
+            mainDependencyProvider.getGlideRequestManager()
                 .load(it)
                 .into(blog_image)
         } ?: setDefaultImage()
@@ -84,7 +84,7 @@ class CreateBlogFragment : BaseCreateBlogFragment() {
     }
 
     private fun setDefaultImage() {
-        requestManager
+        mainDependencyProvider.getGlideRequestManager()
             .load(R.drawable.default_image)
             .into(blog_image)
     }

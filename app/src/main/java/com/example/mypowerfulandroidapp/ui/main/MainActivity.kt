@@ -8,7 +8,10 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
+import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.models.AUTH_TOKEN_BUNDLE_KEY
+import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.ui.BaseActivity
 import com.example.mypowerfulandroidapp.ui.auth.AuthActivity
 import com.example.mypowerfulandroidapp.ui.main.account.BaseAccountFragment
@@ -20,17 +23,28 @@ import com.example.mypowerfulandroidapp.ui.main.blog.ViewBlogFragment
 import com.example.mypowerfulandroidapp.ui.main.create_blog.BaseCreateBlogFragment
 import com.example.mypowerfulandroidapp.util.BottomNavController
 import com.example.mypowerfulandroidapp.util.setUpNavigation
+import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
+import javax.inject.Inject
 
 
 class MainActivity : BaseActivity(),
     BottomNavController.NavGraphProvider,
     BottomNavController.OnNavigationGraphChanged,
-    BottomNavController.OnNavigationReselectedListener {
+    BottomNavController.OnNavigationReselectedListener,
+    MainDependencyProvider {
     private val TAG = "MainActivity"
+
+    @Inject
+    lateinit var requestManager: RequestManager
+
+    @Inject
+    lateinit var providerFactory: ViewModelProviderFactory
+
     private lateinit var bottomNavigationView: BottomNavigationView
+
     private val bottomNavController by lazy(LazyThreadSafetyMode.NONE) {
         BottomNavController(
             this,
@@ -54,6 +68,7 @@ class MainActivity : BaseActivity(),
             bottomNavController.onNavigationItemSelected()
         }
         subscribeToObservers();
+        restoreSession(savedInstanceState)
     }
 
     private fun subscribeToObservers() {
@@ -63,6 +78,19 @@ class MainActivity : BaseActivity(),
                 navToAuthActivity()
             }
         })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(AUTH_TOKEN_BUNDLE_KEY,
+            sessionManager.cachedToken.value)
+        super.onSaveInstanceState(outState)
+    }
+    private fun restoreSession(savedInstanceState: Bundle?){
+        savedInstanceState?.let { inState->
+            (inState[AUTH_TOKEN_BUNDLE_KEY] as AuthToken?)?.let {authToken ->
+                sessionManager.setValue(authToken)
+            }
+        }
     }
 
     private fun navToAuthActivity() {
@@ -152,4 +180,8 @@ class MainActivity : BaseActivity(),
                 //do nothing
             }
         }
+
+    override fun getVMProviderFactory(): ViewModelProviderFactory = providerFactory
+
+    override fun getGlideRequestManager(): RequestManager = requestManager
 }

@@ -88,7 +88,7 @@ class UpdateBlogFragment : BaseBlogFragment() {
         updateBlogBody: String?,
         updateBlogImage: Uri?
     ) {
-        requestManager
+        mainDependencyProvider.getGlideRequestManager()
             .load(updateBlogImage)
             .into(blog_image)
 

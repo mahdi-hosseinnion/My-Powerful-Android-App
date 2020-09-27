@@ -15,23 +15,25 @@ import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.di.Injectable
 import com.example.mypowerfulandroidapp.ui.DataStateChangeListener
 import com.example.mypowerfulandroidapp.ui.UiCommunicationListener
+import com.example.mypowerfulandroidapp.ui.main.MainDependencyProvider
+import com.example.mypowerfulandroidapp.ui.main.account.AccountViewModel
+import com.example.mypowerfulandroidapp.ui.main.account.state.ACCOUNT_VIEW_STATE_BUNDLE_KEY
+import com.example.mypowerfulandroidapp.ui.main.account.state.AccountViewState
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BLOG_VIEW_STATE_BUNDLE_KEY
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.BlogViewModel
 import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
 import dagger.android.support.DaggerFragment
 import java.lang.ClassCastException
 import javax.inject.Inject
 
-abstract class BaseBlogFragment :  Fragment(), Injectable {
+abstract class BaseBlogFragment : Fragment(), Injectable {
     private val TAG = "BaseBlogFragment"
+
     lateinit var stateChangeListener: DataStateChangeListener
-
     lateinit var uiCommunicationListener: UiCommunicationListener
+    lateinit var mainDependencyProvider: MainDependencyProvider
 
-    @Inject
-    lateinit var requestManager: RequestManager
-
-    @Inject
-    lateinit var providerFactory: ViewModelProviderFactory
 
     lateinit var viewModel: BlogViewModel
 
@@ -40,11 +42,38 @@ abstract class BaseBlogFragment :  Fragment(), Injectable {
         setupActionBarWithNavController(R.id.blogFragment, activity as AppCompatActivity)
 
         viewModel = activity?.run {
-            ViewModelProvider(this, providerFactory).get(BlogViewModel::class.java)
+            ViewModelProvider(this, mainDependencyProvider.getVMProviderFactory()
+            ).get(BlogViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         cancelActiveJobs()
 
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProvider(this, mainDependencyProvider.getVMProviderFactory()
+            ).get(BlogViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
+        //restore state after process death
+        savedInstanceState?.let {inState->
+            (inState[BLOG_VIEW_STATE_BUNDLE_KEY] as BlogViewState?)?.let { viewState->
+                viewModel.setViewState(viewState)
+            }
+        }
+        cancelActiveJobs()
+    }
+    private fun isViewModelInitialized()=::viewModel.isInitialized
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (isViewModelInitialized()){
+            outState.putParcelable(
+                BLOG_VIEW_STATE_BUNDLE_KEY,
+                viewModel.viewState.value
+            )
+        }
+        super.onSaveInstanceState(outState)
     }
 
     fun cancelActiveJobs() {
@@ -72,6 +101,11 @@ abstract class BaseBlogFragment :  Fragment(), Injectable {
             uiCommunicationListener = context as UiCommunicationListener
         } catch (e: ClassCastException) {
             Log.e(TAG, "onAttach: $context should implement UiCommunicationListener", e)
+        }
+        try {
+            mainDependencyProvider = context as MainDependencyProvider
+        } catch (e: ClassCastException) {
+            Log.e(TAG, "onAttach: $context should implement MainDependencyProvider", e)
         }
     }
 }

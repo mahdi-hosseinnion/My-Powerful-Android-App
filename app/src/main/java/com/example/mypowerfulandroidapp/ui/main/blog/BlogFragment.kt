@@ -190,7 +190,7 @@ class BlogFragment : BaseBlogFragment(),
             addItemDecoration(topSpacingItemDecoration)
             recyclerAdapter = BlogListAdapter(
                 this@BlogFragment,
-                requestManager
+                mainDependencyProvider.getGlideRequestManager()
             )
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
