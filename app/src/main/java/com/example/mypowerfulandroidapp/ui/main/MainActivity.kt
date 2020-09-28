@@ -22,6 +22,7 @@ import com.example.mypowerfulandroidapp.ui.main.blog.UpdateBlogFragment
 import com.example.mypowerfulandroidapp.ui.main.blog.ViewBlogFragment
 import com.example.mypowerfulandroidapp.ui.main.create_blog.BaseCreateBlogFragment
 import com.example.mypowerfulandroidapp.util.BottomNavController
+import com.example.mypowerfulandroidapp.util.NAVIGATION_BACK_STACK_KEY
 import com.example.mypowerfulandroidapp.util.setUpNavigation
 import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
 import com.google.android.material.appbar.AppBarLayout
@@ -59,16 +60,24 @@ class MainActivity : BaseActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         setupActionBar()
+        setupBottomNavigationView(savedInstanceState)
+        subscribeToObservers();
+        restoreSession(savedInstanceState)
+    }
 
+    private fun setupBottomNavigationView(savedInstanceState: Bundle?) {
         bottomNavigationView = findViewById(R.id.bottom_navigation_view)
         bottomNavigationView.setUpNavigation(bottomNavController, this)
         if (savedInstanceState == null) {
+            bottomNavController.setupBottomNavigationBackStack(null)
             bottomNavController.onNavigationItemSelected()
         }
-        subscribeToObservers();
-        restoreSession(savedInstanceState)
+        (savedInstanceState?.get(NAVIGATION_BACK_STACK_KEY) as IntArray?)?.let { intArray ->
+            val backStack = BottomNavController.BackStack()
+            backStack.addAll(intArray.toTypedArray())
+            bottomNavController.setupBottomNavigationBackStack(backStack)
+        }
     }
 
     private fun subscribeToObservers() {
@@ -81,13 +90,20 @@ class MainActivity : BaseActivity(),
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(AUTH_TOKEN_BUNDLE_KEY,
-            sessionManager.cachedToken.value)
+        outState.putParcelable(
+            AUTH_TOKEN_BUNDLE_KEY,
+            sessionManager.cachedToken.value
+        )
+        outState.putIntArray(
+            NAVIGATION_BACK_STACK_KEY,
+            bottomNavController.navigationBackStack.toIntArray()
+        )
         super.onSaveInstanceState(outState)
     }
-    private fun restoreSession(savedInstanceState: Bundle?){
-        savedInstanceState?.let { inState->
-            (inState[AUTH_TOKEN_BUNDLE_KEY] as AuthToken?)?.let {authToken ->
+
+    private fun restoreSession(savedInstanceState: Bundle?) {
+        savedInstanceState?.let { inState ->
+            (inState[AUTH_TOKEN_BUNDLE_KEY] as AuthToken?)?.let { authToken ->
                 sessionManager.setValue(authToken)
             }
         }

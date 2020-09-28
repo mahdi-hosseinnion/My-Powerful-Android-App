@@ -19,6 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
  * https://stackoverflow.com/questions/50577356/android-jetpack-navigation-bottomnavigationview-with-youtube-or-instagram-like#_=_
  * @property navigationBackStack: Backstack for the bottom navigation
  */
+const val NAVIGATION_BACK_STACK_KEY="com.example.mypowerfulandroidapp.util.BottomNavController.navigationBackStack"
 class BottomNavController(
     val context: Context,
     @IdRes val containerId: Int,
@@ -27,7 +28,7 @@ class BottomNavController(
     val navGraphProvider: NavGraphProvider
 ) {
     private val TAG: String = "AppDebug"
-    private val navigationBackStack = BackStack.of(appStartDestinationId)
+    lateinit var navigationBackStack:BackStack
     lateinit var activity: Activity
     lateinit var fragmentManager: FragmentManager
     lateinit var navItemChangeListener: OnNavigationItemChanged
@@ -37,6 +38,10 @@ class BottomNavController(
             activity = context
             fragmentManager = (activity as FragmentActivity).supportFragmentManager
         }
+    }
+
+    fun setupBottomNavigationBackStack(previousBackStack: BackStack?) {
+        navigationBackStack = previousBackStack ?: BackStack.of(appStartDestinationId)
     }
 
     fun onNavigationItemSelected(itemId: Int = navigationBackStack.last()): Boolean {
@@ -99,7 +104,7 @@ class BottomNavController(
         }
     }
 
-    private class BackStack : ArrayList<Int>() {
+    public class BackStack : ArrayList<Int>() {
         companion object {
             fun of(vararg elements: Int): BackStack {
                 val b = BackStack()
