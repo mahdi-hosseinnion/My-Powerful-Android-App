@@ -82,12 +82,29 @@ class BlogFragment : BaseBlogFragment(),
 
         initRecyclerView()
         subscribeObservers()
-        if (savedInstanceState == null) {
-            viewModel.loadFirstPage()
+
+    }
+
+    override fun onResume() {
+            super.onResume()
+        viewModel.refreshFromCache()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        saveLayoutManagerState()
+    }
+    private fun saveLayoutManagerState(){
+        blog_post_recyclerview?.layoutManager?.onSaveInstanceState()?.let {lmState->
+            viewModel.setLayoutManagerState(lmState)
         }
     }
 
-
+    override fun restoreListPosition() {
+        viewModel.viewState.value?.blogFields?.layoutManagerState?.let { layoutManager->
+            blog_post_recyclerview?.layoutManager?.onRestoreInstanceState(layoutManager)
+        }
+    }
     private fun subscribeObservers() {
         viewModel.dataState.observe(viewLifecycleOwner) { dataState ->
             if (dataState != null) {

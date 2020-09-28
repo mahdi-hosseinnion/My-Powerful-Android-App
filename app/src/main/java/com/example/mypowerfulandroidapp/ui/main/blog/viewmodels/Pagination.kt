@@ -19,6 +19,12 @@ fun BlogViewModel.loadFirstPage() {
     setStatEvent(BlogSearchEvent())
 }
 
+fun BlogViewModel.refreshFromCache() {
+    setQueryInProgress(true)
+    setQueryExhausted(false)
+    setStatEvent(RestoreBlogListFromCache())
+}
+
 fun BlogViewModel.incrementPageNumber() {
     val update = getCurrentViewStateOrNew()
     val page = update.copy().blogFields.page

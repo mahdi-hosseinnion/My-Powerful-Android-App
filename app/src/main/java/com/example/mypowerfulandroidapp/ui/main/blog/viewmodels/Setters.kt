@@ -1,6 +1,7 @@
 package com.example.mypowerfulandroidapp.ui.main.blog.viewmodels
 
 import android.net.Uri
+import android.os.Parcelable
 import androidx.core.net.toUri
 import com.example.mypowerfulandroidapp.models.BlogPost
 
@@ -19,6 +20,18 @@ fun BlogViewModel.setBlogListData(blogList: List<BlogPost>) {
 fun BlogViewModel.setBlogPost(blogPost: BlogPost) {
     val update = getCurrentViewStateOrNew()
     update.viewBlogFields.blogPost = blogPost
+    setViewState(update)
+}
+
+fun BlogViewModel.setLayoutManagerState(layoutManagerState:Parcelable){
+    val update=getCurrentViewStateOrNew()
+    update.blogFields.layoutManagerState=layoutManagerState
+    setViewState(update)
+}
+
+fun BlogViewModel.clearLayoutManagerState(){
+    val update=getCurrentViewStateOrNew()
+    update.blogFields.layoutManagerState=null
     setViewState(update)
 }
 

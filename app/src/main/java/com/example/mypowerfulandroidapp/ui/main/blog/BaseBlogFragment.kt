@@ -67,10 +67,13 @@ abstract class BaseBlogFragment : Fragment(), Injectable {
     private fun isViewModelInitialized()=::viewModel.isInitialized
 
     override fun onSaveInstanceState(outState: Bundle) {
+
+        val viewState= viewModel.viewState.value
+        viewState?.blogFields?.blogList=ArrayList()
         if (isViewModelInitialized()){
             outState.putParcelable(
                 BLOG_VIEW_STATE_BUNDLE_KEY,
-                viewModel.viewState.value
+                viewState
             )
         }
         super.onSaveInstanceState(outState)
