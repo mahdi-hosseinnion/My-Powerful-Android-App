@@ -5,21 +5,63 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.core.net.toUri
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.ui.*
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BLOG_VIEW_STATE_BUNDLE_KEY
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogStateEvent
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.*
 import com.example.mypowerfulandroidapp.util.DateUtils
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_HAS_PERMISSION_TO_EDIT
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.android.synthetic.main.fragment_view_blog.*
 import java.lang.Exception
+import javax.inject.Inject
 
 
-class ViewBlogFragment : BaseBlogFragment() {
+class ViewBlogFragment @Inject
+constructor(
+    private val viewModelFactory: ViewModelProvider.Factory,
+    private val requestManager: RequestManager
+) : BaseBlogFragment(R.layout.fragment_blog){
+
+
+    val viewModel: BlogViewModel by viewModels {
+        viewModelFactory
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //restore state after process death
+        savedInstanceState?.let { inState ->
+            (inState[BLOG_VIEW_STATE_BUNDLE_KEY] as BlogViewState?)?.let { viewState ->
+                viewModel.setViewState(viewState)
+            }
+        }
+        cancelActiveJobs()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+
+        val viewState = viewModel.viewState.value
+        viewState?.blogFields?.blogList = ArrayList()
+        outState.putParcelable(
+            BLOG_VIEW_STATE_BUNDLE_KEY,
+            viewState
+        )
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun cancelActiveJobs() {
+        viewModel.cancelActiveJobs()
+    }
 
     private val TAG = "ViewBlogFragment"
     override fun onCreateView(
@@ -106,7 +148,7 @@ class ViewBlogFragment : BaseBlogFragment() {
     }
 
     private fun setBlogProperties(blogPost: BlogPost) {
-        mainDependencyProvider.getGlideRequestManager()
+        requestManager
             .load(blogPost.image)
             .into(blog_image)
         blog_title.text = blogPost.title

@@ -7,15 +7,19 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.*
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.ui.*
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BLOG_VIEW_STATE_BUNDLE_KEY
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogStateEvent
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.getBlogPost
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.getUpdatedBlogUri
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.onBlogPostUpdateSuccess
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.setUpdatedBlogFields
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
+import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.*
 import com.example.mypowerfulandroidapp.ui.main.create_blog.state.CreateBlogStateEvent
 import com.example.mypowerfulandroidapp.util.Constants
 import com.example.mypowerfulandroidapp.util.ErrorHandling
@@ -30,8 +34,46 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import javax.inject.Inject
 
-class UpdateBlogFragment : BaseBlogFragment() {
+class UpdateBlogFragment
+@Inject
+constructor(
+    private val viewModelFactory: ViewModelProvider.Factory,
+    private val requestManager: RequestManager
+) : BaseBlogFragment(R.layout.fragment_blog){
+
+
+    val viewModel: BlogViewModel by viewModels {
+        viewModelFactory
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //restore state after process death
+        savedInstanceState?.let { inState ->
+            (inState[BLOG_VIEW_STATE_BUNDLE_KEY] as BlogViewState?)?.let { viewState ->
+                viewModel.setViewState(viewState)
+            }
+        }
+        cancelActiveJobs()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+
+        val viewState = viewModel.viewState.value
+        viewState?.blogFields?.blogList = ArrayList()
+        outState.putParcelable(
+            BLOG_VIEW_STATE_BUNDLE_KEY,
+            viewState
+        )
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun cancelActiveJobs() {
+        viewModel.cancelActiveJobs()
+    }
     private  val TAG = "UpdateBlogFragment"
 
     override fun onCreateView(
@@ -88,7 +130,7 @@ class UpdateBlogFragment : BaseBlogFragment() {
         updateBlogBody: String?,
         updateBlogImage: Uri?
     ) {
-        mainDependencyProvider.getGlideRequestManager()
+        requestManager
             .load(updateBlogImage)
             .into(blog_image)
 
@@ -210,4 +252,5 @@ class UpdateBlogFragment : BaseBlogFragment() {
             )
         )
     }
+
 }

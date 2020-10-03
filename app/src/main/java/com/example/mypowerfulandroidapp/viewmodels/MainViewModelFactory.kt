@@ -2,10 +2,11 @@ package com.example.mypowerfulandroidapp.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.mypowerfulandroidapp.di.main.MainScope
 import javax.inject.Inject
 import javax.inject.Provider
-
-class ViewModelProviderFactory
+@MainScope
+class MainViewModelFactory
 @Inject
 constructor(
     private val creators: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>

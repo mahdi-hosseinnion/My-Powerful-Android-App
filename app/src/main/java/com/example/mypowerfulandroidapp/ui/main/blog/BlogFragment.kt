@@ -12,7 +12,9 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +23,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
+import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.persistence.BlogQueryUtils
@@ -28,11 +31,13 @@ import com.example.mypowerfulandroidapp.persistence.BlogQueryUtils.Companion.BLO
 import com.example.mypowerfulandroidapp.persistence.BlogQueryUtils.Companion.BLOG_FILTER_USERNAME
 import com.example.mypowerfulandroidapp.persistence.BlogQueryUtils.Companion.BLOG_ORDER_ASC
 import com.example.mypowerfulandroidapp.ui.DataState
+import com.example.mypowerfulandroidapp.ui.main.blog.state.BLOG_VIEW_STATE_BUNDLE_KEY
 import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
 import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.*
 import com.example.mypowerfulandroidapp.util.ErrorHandling
 import com.example.mypowerfulandroidapp.util.TopSpacingItemDecoration
 import kotlinx.android.synthetic.main.fragment_blog.*
+import javax.inject.Inject
 
 /*import android.app.SearchManager
 import android.content.ComponentName
@@ -57,22 +62,51 @@ import com.example.mypowerfulandroidapp.util.ErrorHandling
 import com.example.mypowerfulandroidapp.util.TopSpacingItemDecoration
 import kotlinx.android.synthetic.main.fragment_blog.**/
 
-class BlogFragment : BaseBlogFragment(),
+class BlogFragment
+@Inject
+constructor(
+    private val viewModelFactory: ViewModelProvider.Factory,
+    private val requestManager: RequestManager
+) : BaseBlogFragment(R.layout.fragment_blog),
     BlogListAdapter.Interaction,
     SwipeRefreshLayout.OnRefreshListener {
-    private val TAG = "BlogFragment"
 
+
+    val viewModel: BlogViewModel by viewModels {
+        viewModelFactory
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //restore state after process death
+        savedInstanceState?.let { inState ->
+            (inState[BLOG_VIEW_STATE_BUNDLE_KEY] as BlogViewState?)?.let { viewState ->
+                viewModel.setViewState(viewState)
+            }
+        }
+        cancelActiveJobs()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+
+        val viewState = viewModel.viewState.value
+        viewState?.blogFields?.blogList = ArrayList()
+        outState.putParcelable(
+            BLOG_VIEW_STATE_BUNDLE_KEY,
+            viewState
+        )
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun cancelActiveJobs() {
+        viewModel.cancelActiveJobs()
+    }
+
+    private val TAG = "BlogFragment"
 
     lateinit var recyclerAdapter: BlogListAdapter
     private lateinit var searchView: SearchView
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_blog, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -86,7 +120,7 @@ class BlogFragment : BaseBlogFragment(),
     }
 
     override fun onResume() {
-            super.onResume()
+        super.onResume()
         viewModel.refreshFromCache()
     }
 
@@ -94,17 +128,19 @@ class BlogFragment : BaseBlogFragment(),
         super.onPause()
         saveLayoutManagerState()
     }
-    private fun saveLayoutManagerState(){
-        blog_post_recyclerview?.layoutManager?.onSaveInstanceState()?.let {lmState->
+
+    private fun saveLayoutManagerState() {
+        blog_post_recyclerview?.layoutManager?.onSaveInstanceState()?.let { lmState ->
             viewModel.setLayoutManagerState(lmState)
         }
     }
 
     override fun restoreListPosition() {
-        viewModel.viewState.value?.blogFields?.layoutManagerState?.let { layoutManager->
+        viewModel.viewState.value?.blogFields?.layoutManagerState?.let { layoutManager ->
             blog_post_recyclerview?.layoutManager?.onRestoreInstanceState(layoutManager)
         }
     }
+
     private fun subscribeObservers() {
         viewModel.dataState.observe(viewLifecycleOwner) { dataState ->
             if (dataState != null) {
@@ -207,7 +243,7 @@ class BlogFragment : BaseBlogFragment(),
             addItemDecoration(topSpacingItemDecoration)
             recyclerAdapter = BlogListAdapter(
                 this@BlogFragment,
-                mainDependencyProvider.getGlideRequestManager()
+                requestManager
             )
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {

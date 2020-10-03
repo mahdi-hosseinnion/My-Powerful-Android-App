@@ -4,84 +4,52 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import com.bumptech.glide.RequestManager
 import com.example.mypowerfulandroidapp.R
-import com.example.mypowerfulandroidapp.di.Injectable
 import com.example.mypowerfulandroidapp.ui.DataStateChangeListener
 import com.example.mypowerfulandroidapp.ui.UiCommunicationListener
-import com.example.mypowerfulandroidapp.ui.main.MainDependencyProvider
-import com.example.mypowerfulandroidapp.ui.main.account.AccountViewModel
-import com.example.mypowerfulandroidapp.ui.main.account.state.ACCOUNT_VIEW_STATE_BUNDLE_KEY
-import com.example.mypowerfulandroidapp.ui.main.account.state.AccountViewState
-import com.example.mypowerfulandroidapp.ui.main.blog.state.BLOG_VIEW_STATE_BUNDLE_KEY
-import com.example.mypowerfulandroidapp.ui.main.blog.state.BlogViewState
-import com.example.mypowerfulandroidapp.ui.main.blog.viewmodels.BlogViewModel
-import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
-import dagger.android.support.DaggerFragment
 import java.lang.ClassCastException
 import javax.inject.Inject
 
-abstract class BaseBlogFragment : Fragment(), Injectable {
+abstract class BaseBlogFragment
+constructor(
+    @LayoutRes
+    private val layoutId:Int
+) : Fragment(layoutId) {
     private val TAG = "BaseBlogFragment"
 
     lateinit var stateChangeListener: DataStateChangeListener
     lateinit var uiCommunicationListener: UiCommunicationListener
-    lateinit var mainDependencyProvider: MainDependencyProvider
 
 
-    lateinit var viewModel: BlogViewModel
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        //restore state after process death
+//        savedInstanceState?.let { inState ->
+//            (inState[BLOG_VIEW_STATE_BUNDLE_KEY] as BlogViewState?)?.let { viewState ->
+//                viewModel.setViewState(viewState)
+//            }
+//        }
+//        cancelActiveJobs()
+//    }
+//
+//    override fun onSaveInstanceState(outState: Bundle) {
+//
+//        val viewState = viewModel.viewState.value
+//        viewState?.blogFields?.blogList = ArrayList()
+//        outState.putParcelable(
+//            BLOG_VIEW_STATE_BUNDLE_KEY,
+//            viewState
+//        )
+//        super.onSaveInstanceState(outState)
+//    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupActionBarWithNavController(R.id.blogFragment, activity as AppCompatActivity)
-
-        viewModel = activity?.run {
-            ViewModelProvider(this, mainDependencyProvider.getVMProviderFactory()
-            ).get(BlogViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
-        cancelActiveJobs()
-
-    }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = activity?.run {
-            ViewModelProvider(this, mainDependencyProvider.getVMProviderFactory()
-            ).get(BlogViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
-        //restore state after process death
-        savedInstanceState?.let {inState->
-            (inState[BLOG_VIEW_STATE_BUNDLE_KEY] as BlogViewState?)?.let { viewState->
-                viewModel.setViewState(viewState)
-            }
-        }
-        cancelActiveJobs()
-    }
-    private fun isViewModelInitialized()=::viewModel.isInitialized
-
-    override fun onSaveInstanceState(outState: Bundle) {
-
-        val viewState= viewModel.viewState.value
-        viewState?.blogFields?.blogList=ArrayList()
-        if (isViewModelInitialized()){
-            outState.putParcelable(
-                BLOG_VIEW_STATE_BUNDLE_KEY,
-                viewState
-            )
-        }
-        super.onSaveInstanceState(outState)
-    }
-
-    fun cancelActiveJobs() {
-        viewModel.cancelActiveJobs()
-    }
+    abstract fun cancelActiveJobs()
 
     private fun setupActionBarWithNavController(fragmentId: Int, activity: AppCompatActivity) {
         val appBarConfiguration = AppBarConfiguration(setOf(fragmentId))
@@ -91,6 +59,11 @@ abstract class BaseBlogFragment : Fragment(), Injectable {
             appBarConfiguration
         )
 
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupActionBarWithNavController(R.id.blogFragment, activity as AppCompatActivity)
     }
 
     override fun onAttach(context: Context) {
@@ -105,10 +78,6 @@ abstract class BaseBlogFragment : Fragment(), Injectable {
         } catch (e: ClassCastException) {
             Log.e(TAG, "onAttach: $context should implement UiCommunicationListener", e)
         }
-        try {
-            mainDependencyProvider = context as MainDependencyProvider
-        } catch (e: ClassCastException) {
-            Log.e(TAG, "onAttach: $context should implement MainDependencyProvider", e)
-        }
+
     }
 }

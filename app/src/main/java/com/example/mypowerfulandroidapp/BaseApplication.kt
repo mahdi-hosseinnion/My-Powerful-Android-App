@@ -1,27 +1,49 @@
 package com.example.mypowerfulandroidapp
 
-import android.app.Activity
 import android.app.Application
-import com.example.mypowerfulandroidapp.di.AppInjector
+import com.example.mypowerfulandroidapp.di.AppComponent
 import com.example.mypowerfulandroidapp.di.DaggerAppComponent
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import dagger.android.support.DaggerApplication
-import javax.inject.Inject
+import com.example.mypowerfulandroidapp.di.auth.AuthComponent
+import com.example.mypowerfulandroidapp.di.main.MainComponent
 
-class BaseApplication: Application(),HasActivityInjector {
+class BaseApplication : Application() {
 
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+    lateinit var appComponent: AppComponent
 
-    override fun activityInjector(): AndroidInjector<Activity> =dispatchingAndroidInjector
+    private var authComponent: AuthComponent? = null
+    private var mainComponent: MainComponent? = null
 
     override fun onCreate() {
         super.onCreate()
-        AppInjector.init(this)
-
+        initAppComponent()
     }
 
+    private fun initAppComponent() {
+        appComponent = DaggerAppComponent.builder()
+            .application(this).build()
+    }
+
+    fun authComponent(): AuthComponent {
+        if (authComponent == null) {
+            authComponent = appComponent.authComponent().create()
+        }
+        return authComponent as AuthComponent
+    }
+
+    fun releaseAuthComponent() {
+        authComponent = null
+    }
+
+
+    fun mainComponent(): MainComponent {
+        if (mainComponent == null) {
+            mainComponent = appComponent.mainComponent().create()
+        }
+        return mainComponent as MainComponent
+    }
+
+    fun releaseMainComponent() {
+        mainComponent = null
+    }
 
 }

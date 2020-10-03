@@ -2,21 +2,20 @@ package com.example.mypowerfulandroidapp.ui
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.mypowerfulandroidapp.di.DaggerAppComponent
 import com.example.mypowerfulandroidapp.session.SessionManager
 import com.example.mypowerfulandroidapp.util.Constants.Companion.PERMISSION_REQUEST_READ_STORAGE
-import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.jar.Manifest
 import javax.inject.Inject
 
-abstract class BaseActivity : DaggerAppCompatActivity(),
+abstract class BaseActivity : AppCompatActivity(),
     DataStateChangeListener,
     UiCommunicationListener {
     private val TAG = "BaseActivity"
@@ -24,6 +23,14 @@ abstract class BaseActivity : DaggerAppCompatActivity(),
 
     @Inject
     lateinit var sessionManager: SessionManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        inject()
+        super.onCreate(savedInstanceState)
+    }
+
+    abstract fun inject()
+
     override fun onDataStateChange(dataState: DataState<*>?) {
         dataState?.let { dataState ->
             GlobalScope.launch(Main) {

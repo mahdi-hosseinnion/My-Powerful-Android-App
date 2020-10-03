@@ -9,6 +9,7 @@ import androidx.lifecycle.switchMap
 import com.example.mypowerfulandroidapp.api.auth.OpenApiAuthService
 import com.example.mypowerfulandroidapp.api.auth.network_response.LoginResponse
 import com.example.mypowerfulandroidapp.api.auth.network_response.RegistrationResponse
+import com.example.mypowerfulandroidapp.di.auth.AuthScope
 import com.example.mypowerfulandroidapp.models.AccountProperties
 import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.persistence.AccountPropertiesDao
@@ -28,7 +29,7 @@ import com.example.mypowerfulandroidapp.util.ErrorHandling.Companion.GENERIC_AUT
 import com.example.mypowerfulandroidapp.util.SuccessHandling.Companion.RESPONSE_CHECK_PREVIOUS_AUTH_USER_DONE
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.Job
-
+@AuthScope
 class AuthRepository
 constructor(
     val authTokenDao: AuthTokenDao,

@@ -5,12 +5,13 @@ import androidx.lifecycle.LiveData
 import com.example.mypowerfulandroidapp.api.GenericResponse
 import com.example.mypowerfulandroidapp.api.main.responses.BlogCreateUpdateResponse
 import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchResponse
+import com.example.mypowerfulandroidapp.di.main.MainScope
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
 import com.example.mypowerfulandroidapp.models.AccountProperties
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.*
-
+@MainScope
 interface OpenApiMainService {
 
     @GET("account/properties")

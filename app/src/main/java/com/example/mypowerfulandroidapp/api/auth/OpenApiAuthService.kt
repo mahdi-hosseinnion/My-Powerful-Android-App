@@ -3,11 +3,12 @@ package com.example.mypowerfulandroidapp.api.auth
 import androidx.lifecycle.LiveData
 import com.example.mypowerfulandroidapp.api.auth.network_response.LoginResponse
 import com.example.mypowerfulandroidapp.api.auth.network_response.RegistrationResponse
+import com.example.mypowerfulandroidapp.di.auth.AuthScope
 import com.example.mypowerfulandroidapp.util.GenericApiResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
-
+@AuthScope
 interface OpenApiAuthService {
     @POST("account/login")
     @FormUrlEncoded

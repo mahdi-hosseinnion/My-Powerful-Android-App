@@ -14,6 +14,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.fragments.main.account.AccountNavHostFragment
+import com.example.mypowerfulandroidapp.fragments.main.blog.BlogNavHostFragment
+import com.example.mypowerfulandroidapp.fragments.main.create_blog.CreateBlogNavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 /**
@@ -22,16 +25,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
  * https://stackoverflow.com/questions/50577356/android-jetpack-navigation-bottomnavigationview-with-youtube-or-instagram-like#_=_
  * @property navigationBackStack: Backstack for the bottom navigation
  */
-const val NAVIGATION_BACK_STACK_KEY="com.example.mypowerfulandroidapp.util.BottomNavController.navigationBackStack"
+const val NAVIGATION_BACK_STACK_KEY =
+    "com.example.mypowerfulandroidapp.util.BottomNavController.navigationBackStack"
+
 class BottomNavController(
     val context: Context,
     @IdRes val containerId: Int,
     @IdRes val appStartDestinationId: Int,
-    val graphChangeListener: OnNavigationGraphChanged?,
-    val navGraphProvider: NavGraphProvider
+    val graphChangeListener: OnNavigationGraphChanged?
+//    val navGraphProvider: NavGraphProvider
 ) {
     private val TAG: String = "AppDebug"
-    lateinit var navigationBackStack:BackStack
+    lateinit var navigationBackStack: BackStack
     lateinit var activity: Activity
     lateinit var fragmentManager: FragmentManager
     lateinit var navItemChangeListener: OnNavigationItemChanged
@@ -50,7 +55,7 @@ class BottomNavController(
     fun onNavigationItemSelected(itemId: Int = navigationBackStack.last()): Boolean {
         // Replace fragment representing a navigation item
         val fragment = fragmentManager.findFragmentByTag(itemId.toString())
-            ?: NavHostFragment.create(navGraphProvider.getNavGraphId(itemId))
+            ?: createNavHost(itemId)
         fragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.fade_in,
@@ -73,6 +78,24 @@ class BottomNavController(
 
         return true
     }
+
+    fun createNavHost(menuItemId: Int) =
+        when (menuItemId) {
+            R.id.menu_nav_account -> {
+                AccountNavHostFragment.create(R.navigation.nav_account)
+            }
+            R.id.menu_nav_blog -> {
+                BlogNavHostFragment.create(R.navigation.nav_blog)
+            }
+
+            R.id.menu_nav_create_blog -> {
+                CreateBlogNavHostFragment.create(R.navigation.nav_create_blog)
+            }
+            else -> {
+                BlogNavHostFragment.create(R.navigation.nav_blog)
+            }
+        }
+
     @SuppressLint("RestrictedApi")
     fun onBackPressed() {
         val navController = fragmentManager.findFragmentById(containerId)!!
@@ -85,7 +108,7 @@ class BottomNavController(
             // supportFragmentManager may mess up with the NavController child fragment manager back
             // stack
             //b/c there is nav control it self in backStack we should check 2
-            navController.backStack.size > 2 ->{
+            navController.backStack.size > 2 -> {
                 navController.popBackStack()
             }
 
@@ -138,13 +161,13 @@ class BottomNavController(
         fun onItemChanged(itemId: Int)
     }
 
-    // Get id of each graph
-    // ex: R.navigation.nav_blog
-    // ex: R.navigation.nav_create_blog
-    interface NavGraphProvider {
-        @NavigationRes
-        fun getNavGraphId(itemId: Int): Int
-    }
+//    // Get id of each graph
+//    // ex: R.navigation.nav_blog
+//    // ex: R.navigation.nav_create_blog
+//    interface NavGraphProvider {
+//        @NavigationRes
+//        fun getNavGraphId(itemId: Int): Int
+//    }
 
     // Execute when Navigation Graph changes.
     // ex: Select a new item on the bottom navigation

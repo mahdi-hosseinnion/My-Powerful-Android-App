@@ -6,9 +6,11 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentFactory
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.bumptech.glide.RequestManager
+import com.example.mypowerfulandroidapp.BaseApplication
 import com.example.mypowerfulandroidapp.R
 import com.example.mypowerfulandroidapp.models.AUTH_TOKEN_BUNDLE_KEY
 import com.example.mypowerfulandroidapp.models.AuthToken
@@ -24,25 +26,30 @@ import com.example.mypowerfulandroidapp.ui.main.create_blog.BaseCreateBlogFragme
 import com.example.mypowerfulandroidapp.util.BottomNavController
 import com.example.mypowerfulandroidapp.util.NAVIGATION_BACK_STACK_KEY
 import com.example.mypowerfulandroidapp.util.setUpNavigation
-import com.example.mypowerfulandroidapp.viewmodels.ViewModelProviderFactory
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
+import javax.inject.Named
 
 
 class MainActivity : BaseActivity(),
-    BottomNavController.NavGraphProvider,
     BottomNavController.OnNavigationGraphChanged,
-    BottomNavController.OnNavigationReselectedListener,
-    MainDependencyProvider {
+    BottomNavController.OnNavigationReselectedListener {
     private val TAG = "MainActivity"
 
     @Inject
-    lateinit var requestManager: RequestManager
+    @Named("AccountFragmentFactory")
+    lateinit var accountFragmentFactory: FragmentFactory
 
     @Inject
-    lateinit var providerFactory: ViewModelProviderFactory
+    @Named("BlogFragmentFactory")
+    lateinit var blogFragmentFactory: FragmentFactory
+
+    @Inject
+    @Named("CreateBlogFragmentFactory")
+    lateinit var createBlogFragmentFactory: FragmentFactory
+
 
     private lateinit var bottomNavigationView: BottomNavigationView
 
@@ -51,7 +58,6 @@ class MainActivity : BaseActivity(),
             this,
             R.id.main_nav_host_fragment,
             R.id.nav_blog,
-            this,
             this
         )
     }
@@ -64,6 +70,11 @@ class MainActivity : BaseActivity(),
         setupBottomNavigationView(savedInstanceState)
         subscribeToObservers();
         restoreSession(savedInstanceState)
+    }
+
+    override fun inject() {
+        (application as BaseApplication).mainComponent()
+            .inject(this)
     }
 
     private fun setupBottomNavigationView(savedInstanceState: Bundle?) {
@@ -112,6 +123,7 @@ class MainActivity : BaseActivity(),
     private fun navToAuthActivity() {
         startActivity(Intent(this, AuthActivity::class.java))
         finish()
+        (application as BaseApplication).releaseMainComponent()
     }
 
     override fun displayProgressBar(loading: Boolean) {
@@ -140,20 +152,20 @@ class MainActivity : BaseActivity(),
     }
 
     override fun onBackPressed() = bottomNavController.onBackPressed()
-    override fun getNavGraphId(itemId: Int) = when (itemId) {
-        R.id.nav_blog -> {
-            R.navigation.nav_blog
-        }
-        R.id.nav_account -> {
-            R.navigation.nav_account
-        }
-        R.id.nav_create_blog -> {
-            R.navigation.nav_create_blog
-        }
-        else -> {
-            R.navigation.nav_blog
-        }
-    }
+//    override fun getNavGraphId(itemId: Int) = when (itemId) {
+//        R.id.nav_blog -> {
+//            R.navigation.nav_blog
+//        }
+//        R.id.nav_account -> {
+//            R.navigation.nav_account
+//        }
+//        R.id.nav_create_blog -> {
+//            R.navigation.nav_create_blog
+//        }
+//        else -> {
+//            R.navigation.nav_blog
+//        }
+//    }
 
     override fun onGraphChange() {
         expandAppBar()
@@ -197,7 +209,5 @@ class MainActivity : BaseActivity(),
             }
         }
 
-    override fun getVMProviderFactory(): ViewModelProviderFactory = providerFactory
 
-    override fun getGlideRequestManager(): RequestManager = requestManager
 }

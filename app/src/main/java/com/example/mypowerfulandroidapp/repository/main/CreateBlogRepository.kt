@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import com.example.mypowerfulandroidapp.api.main.OpenApiMainService
 import com.example.mypowerfulandroidapp.api.main.responses.BlogCreateUpdateResponse
+import com.example.mypowerfulandroidapp.di.main.MainScope
 import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.persistence.BlogPostDao
@@ -29,7 +30,7 @@ import okhttp3.RequestBody
 import retrofit2.http.Multipart
 import javax.inject.Inject
 import kotlin.random.Random
-
+@MainScope
 class CreateBlogRepository
 @Inject
 constructor(

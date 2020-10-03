@@ -7,6 +7,7 @@ import com.example.mypowerfulandroidapp.api.GenericResponse
 import com.example.mypowerfulandroidapp.api.main.OpenApiMainService
 import com.example.mypowerfulandroidapp.api.main.responses.BlogCreateUpdateResponse
 import com.example.mypowerfulandroidapp.api.main.responses.BlogListSearchResponse
+import com.example.mypowerfulandroidapp.di.main.MainScope
 import com.example.mypowerfulandroidapp.models.AuthToken
 import com.example.mypowerfulandroidapp.models.BlogPost
 import com.example.mypowerfulandroidapp.persistence.BlogPostDao
@@ -35,7 +36,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import javax.inject.Inject
 import kotlin.collections.ArrayList
-
+@MainScope
 class BlogRepository
 @Inject
 constructor(

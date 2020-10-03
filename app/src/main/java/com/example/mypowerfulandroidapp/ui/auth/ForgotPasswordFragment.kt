@@ -12,8 +12,11 @@ import android.view.animation.TranslateAnimation
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.mypowerfulandroidapp.R
+import com.example.mypowerfulandroidapp.di.auth.AuthScope
 import com.example.mypowerfulandroidapp.ui.DataState
 import com.example.mypowerfulandroidapp.ui.DataStateChangeListener
 import com.example.mypowerfulandroidapp.ui.Response
@@ -24,8 +27,29 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.ClassCastException
+import javax.inject.Inject
 
-class ForgotPasswordFragment : BaseAuthFragment() {
+@AuthScope
+class ForgotPasswordFragment
+@Inject
+constructor(
+    private val viewModelFactory: ViewModelProvider.Factory
+) : Fragment(R.layout.fragment_forgot_password) {
+
+    val viewModel: AuthViewModel by viewModels {
+        viewModelFactory
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        cancelActiveJobs()
+    }
+
+    private fun cancelActiveJobs() {
+        viewModel.cancelActiveJobs()
+    }
+
+
     private val TAG = "ForgotPasswordFragment"
     private lateinit var mWebView: WebView
     lateinit var onDataStateChangeListener: DataStateChangeListener
@@ -62,8 +86,7 @@ class ForgotPasswordFragment : BaseAuthFragment() {
             parent_view.removeView(webview)
             webview.destroy()
             val animation = TranslateAnimation(
-                password_reset_done_container.width.toFloat()
-                , 0f, 0f, 0f
+                password_reset_done_container.width.toFloat(), 0f, 0f, 0f
             )
             animation.duration = 500
             password_reset_done_container.animation = animation
@@ -72,13 +95,6 @@ class ForgotPasswordFragment : BaseAuthFragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_forgot_password, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -118,10 +134,12 @@ class ForgotPasswordFragment : BaseAuthFragment() {
         fun onSuccess(email: String) {
             callBack.onSuccess(email)
         }
+
         @JavascriptInterface
         fun onError(errorMessage: String) {
             callBack.onError(errorMessage)
         }
+
         @JavascriptInterface
         fun onLoading(isLoading: Boolean) {
             callBack.onLoading(isLoading)
