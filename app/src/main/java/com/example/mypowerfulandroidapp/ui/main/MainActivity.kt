@@ -56,8 +56,8 @@ class MainActivity : BaseActivity(),
     private val bottomNavController by lazy(LazyThreadSafetyMode.NONE) {
         BottomNavController(
             this,
-            R.id.main_nav_host_fragment,
-            R.id.nav_blog,
+            R.id.main_fragments_container,
+            R.id.menu_nav_blog,
             this
         )
     }

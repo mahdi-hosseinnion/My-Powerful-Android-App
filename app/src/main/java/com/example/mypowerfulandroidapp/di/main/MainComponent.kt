@@ -6,7 +6,8 @@ import dagger.Subcomponent
 @Subcomponent(
     modules = [
         MainModule::class,
-        MainViewModelModule::class
+        MainViewModelModule::class,
+        MainFragmentsModule::class
     ]
 )
 interface MainComponent {

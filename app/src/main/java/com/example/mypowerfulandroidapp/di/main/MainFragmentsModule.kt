@@ -12,7 +12,7 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module
-object MainFragmentModule {
+object MainFragmentsModule {
 
     @JvmStatic
     @MainScope
